@@ -2,7 +2,10 @@ FROM python:3.10-slim
 
 WORKDIR /app
 
-# نصب پیش‌نیازها، انجین‌اکس و هسته رسمی Xray
+ENV XRAY_LOCATION_ASSET=/usr/local/bin/xray
+ENV PATH="/usr/local/bin/xray:${PATH}"
+
+# نصب Nginx و هسته رسمی Xray
 RUN apt-get update && apt-get install -y nginx wget unzip procps curl && \
     rm -rf /etc/nginx/sites-enabled/* /etc/nginx/conf.d/* && \
     mkdir -p /usr/local/bin/xray /run /var/log/nginx && \
