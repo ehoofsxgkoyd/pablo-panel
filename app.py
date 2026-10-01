@@ -14,13 +14,13 @@ from flask import Flask, render_template, request, jsonify, Response, redirect, 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 
-# ======== تنظیمات ورود به پنل =========
+# ======== تنظیمات اصلی پنل =========
 ADMIN_USERNAME = os.environ.get("ADMIN_USER", "admin")
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASS", "admin")
 XRAY_PORT = 10000
 DB_PATH = "users.db"
 XRAY_CONFIG_PATH = "xray_config.json"
-# =======================================
+# ====================================
 
 def get_db():
     conn = sqlite3.connect(DB_PATH, check_same_thread=False)
@@ -159,34 +159,34 @@ def make_all_vless_configs(user, host):
     
     configs = []
     
-    # ۱. کانفیگ مستقیم و کروم
+    # ۱. کانفیگ اصلی Chrome TLS
     r1 = urllib.parse.quote(f"Pablo-{name} | {status_tag}")
     c1 = f"vless://{u_uuid}@{host}:443?path=%2Fws%2F{u_uuid}&security=tls&alpn=http%2F1.1&encryption=none&insecure=0&host={host}&fp=chrome&type=ws&allowInsecure=0&sni={host}#{r1}"
-    configs.append({"title": "🚀 کانفیگ اصلی TLS (Chrome)", "desc": "پایدارترین کانفیگ برای کلیه اپراتورها", "config": c1})
+    configs.append({"title": "🚀 کانفیگ اصلی TLS (Chrome)", "desc": "پایدار برای کلیه اپراتورها", "config": c1})
     
-    # ۲. کانفیگ EarlyData ضد فیلتر
+    # ۲. کانفیگ EarlyData
     r2 = urllib.parse.quote(f"Pablo-{name} [AntiFilter] | {status_tag}")
     c2 = f"vless://{u_uuid}@{host}:443?path=%2Fws%2F{u_uuid}%3Fed%3D2560&security=tls&alpn=http%2F1.1&encryption=none&insecure=0&host={host}&fp=chrome&type=ws&allowInsecure=0&sni={host}#{r2}"
-    configs.append({"title": "⚡ کانفیگ ضد فیلتر (EarlyData)", "desc": "مخصوص همراه اول، رایتل و مناطق با اختلال", "config": c2})
+    configs.append({"title": "⚡ کانفیگ ضد فیلتر (EarlyData)", "desc": "مخصوص همراه اول و رایتل", "config": c2})
     
-    # ۳. کانفیگ فایرفاکس / مالتی ALPN
+    # ۳. کانفیگ Firefox / Multi ALPN
     r3 = urllib.parse.quote(f"Pablo-{name} [Firefox] | {status_tag}")
     c3 = f"vless://{u_uuid}@{host}:443?path=%2Fws%2F{u_uuid}&security=tls&alpn=h2%2Chttp%2F1.1&encryption=none&insecure=0&host={host}&fp=firefox&type=ws&allowInsecure=0&sni={host}#{r3}"
-    configs.append({"title": "🛡️ کانفیگ مالتی ALPN (Firefox)", "desc": "مخصوص اینترنت خانگی، وای‌فای و مخابرات", "config": c3})
+    configs.append({"title": "🛡️ کانفیگ مالتی ALPN (Firefox)", "desc": "مخصوص مخابرات و وای‌فای خانگی", "config": c3})
     
-    # ۴. کانفیگ سافاری مخصوص iOS
+    # ۴. کانفیگ سافاری iOS
     r4 = urllib.parse.quote(f"Pablo-{name} [Safari-iOS] | {status_tag}")
     c4 = f"vless://{u_uuid}@{host}:443?path=%2Fws%2F{u_uuid}&security=tls&alpn=http%2F1.1&encryption=none&insecure=0&host={host}&fp=safari&type=ws&allowInsecure=0&sni={host}#{r4}"
-    configs.append({"title": "📱 کانفیگ سافاری (iOS / V2Box)", "desc": "بهینه‌شده برای آیفون و ویتوباکس", "config": c4})
+    configs.append({"title": "📱 کانفیگ سافاری (iOS / V2Box)", "desc": "بهینه برای آیفون و ویتوباکس", "config": c4})
     
-    # ۵. کانفیگ پورت ۸۰ بدون TLS
+    # ۵. کانفیگ پورت ۸۰
     r5 = urllib.parse.quote(f"Pablo-{name} [HTTP-80] | {status_tag}")
     c5 = f"vless://{u_uuid}@{host}:80?path=%2Fws%2F{u_uuid}&security=none&encryption=none&host={host}&type=ws#{r5}"
-    configs.append({"title": "🌐 کانفیگ بدون TLS (پورت 80)", "desc": "جهت استفاده در زمان فیلترینگ شدید TLS", "config": c5})
+    configs.append({"title": "🌐 کانفیگ بدون TLS (پورت 80)", "desc": "جهت عبور از اختلالات شدید TLS", "config": c5})
     
     return configs
 
-# ============ روت‌های برنامه ============
+# ============ روت‌ها ============
 
 @app.route('/')
 def home():
@@ -247,7 +247,7 @@ def add_user():
         restart_xray()
         return jsonify({"status": "success", "message": "کاربر با موفقیت ساخته شد"})
     except sqlite3.IntegrityError:
-        return jsonify({"status": "error", "message": "این نام کاربری قبلاً وجود دارد"}), 400
+        return jsonify({"status": "error", "message": "این نام کاربری قبلاً ثبت شده است"}), 400
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
