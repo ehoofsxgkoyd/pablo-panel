@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pablo Rail | {{ user_name }} 🌌</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+* { font-family: 'Vazirmatn', sans-serif; }
+body {
+  background: #000; color: #e0e7ff; overflow-x: hidden;
+}
+.galaxy {
+  position: fixed; inset: 0; z-index: -1;
+  background: 
+    radial-gradient(ellipse at 20% 30%, rgba(139, 92, 246, 0.35), transparent 60%),
+    radial-gradient(ellipse at 80% 70%, rgba(236, 72, 153, 0.3), transparent 60%),
+    radial-gradient(ellipse at 50% 100%, rgba(14, 165, 233, 0.3), transparent 60%),
+    linear-gradient(180deg, #0a0a1f 0%, #000 100%);
+  animation: nebulaShift 20s ease-in-out infinite alternate;
+}
+@keyframes nebulaShift {
+  0% { filter: hue-rotate(0deg) brightness(1); }
+  100% { filter: hue-rotate(60deg) brightness(1.3); }
+}
+.stars {
+  position: fixed; inset: 0; z-index: -1;
+  background-image:
+    radial-gradient(1.5px 1.5px at 10% 20%, white, transparent),
+    radial-gradient(1px 1px at 30% 50%, #c4b5fd, transparent),
+    radial-gradient(2px 2px at 50% 80%, white, transparent),
+    radial-gradient(1px 1px at 70% 30%, #fbcfe8, transparent),
+    radial-gradient(1.5px 1.5px at 90% 90%, white, transparent),
+    radial-gradient(1px 1px at 20% 70%, #93c5fd, transparent);
+  animation: twinkle 4s ease-in-out infinite alternate;
+}
+@keyframes twinkle { 0% { opacity: 0.4; } 100% { opacity: 1; } }
+.cosmic-card {
+  background: linear-gradient(135deg, rgba(76, 29, 149, 0.2), rgba(14, 165, 233, 0.1));
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(167, 139, 250, 0.3);
+  box-shadow: 0 10px 40px rgba(139, 92, 246, 0.2);
+}
+.gradient-text {
+  background: linear-gradient(135deg, #a78bfa, #ec4899, #f59e0b);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.btn-cosmic {
+  background: linear-gradient(135deg, #8b5cf6, #ec4899);
+  transition: all 0.3s;
+}
+.btn-cosmic:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(236, 72, 153, 0.5); }
+.circle-progress {
+  position: relative; width: 180px; height: 180px; margin: 0 auto;
+}
+.circle-progress svg { transform: rotate(-90deg); }
+.circle-progress circle {
+  fill: none; stroke-width: 12; stroke-linecap: round;
+}
+.config-item {
+  background: linear-gradient(135deg, rgba(30, 20, 60, 0.6), rgba(50, 20, 80, 0.4));
+  border: 1px solid rgba(167, 139, 250, 0.25);
+  transition: all 0.3s;
+}
+.config-item:hover {
+  border-color: rgba(236, 72, 153, 0.5);
+  transform: translateY(-2px);
+}
+</style>
+</head>
+<body class="min-h-screen">
+
+<div class="galaxy"></div>
+<div class="stars"></div>
+
+<div class="max-w-3xl mx-auto p-4 md:p-6 space-y-6 relative z-10">
+
+  <!-- Header -->
+  <div class="cosmic-card rounded-3xl p-5 text-center">
+    <div class="text-5xl mb-2">🌌</div>
+    <h1 class="text-2xl font-extrabold gradient-text">Pablo Rail</h1>
+    <p class="text-xs text-purple-300 mt-1">پنل اشتراک فضایی کاربر</p>
+  </div>
+
+  <!-- کارت اطلاعات کاربر -->
+  <div class="cosmic-card rounded-3xl p-6">
+    <div class="flex items-center gap-3 mb-5">
+      <div class="text-3xl">👨‍🚀</div>
+      <div>
+        <div class="text-xl font-bold text-white">{{ user_name }}</div>
+        <div class="text-[11px] text-purple-300">فضانورد کهکشان Pablo</div>
+      </div>
+    </div>
+
+    <!-- دایره پیشرفت مصرف -->
+    <div class="flex flex-col md:flex-row items-center gap-6">
+      <div class="circle-progress">
+        <svg width="180" height="180">
+          <circle cx="90" cy="90" r="75" stroke="rgba(139, 92, 246, 0.2)"></circle>
+          <circle cx="90" cy="90" r="75" 
+            stroke="url(#grad)"
+            stroke-dasharray="471"
+            stroke-dashoffset="{{ 471 - (471 * percent / 100) }}"></circle>
+          <defs>
+            <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#8b5cf6"/>
+              <stop offset="50%" stop-color="#ec4899"/>
+              <stop offset="100%" stop-color="#f59e0b"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <div class="absolute inset-0 flex flex-col items-center justify-center">
+          <div class="text-3xl font-bold gradient-text">{{ percent }}%</div>
+          <div class="text-[10px] text-purple-300 mt-1">مصرف شده</div>
+        </div>
+      </div>
+
+      <div class="flex-1 space-y-3 w-full">
+        <div class="flex justify-between bg-black/40 p-3 rounded-xl border border-purple-500/20">
+          <span class="text-xs text-purple-300">📦 حجم کل</span>
+          <span class="text-sm font-bold text-blue-300">{{ quota_gb }} GB</span>
+        </div>
+        <div class="flex justify-between bg-black/40 p-3 rounded-xl border border-purple-500/20">
+          <span class="text-xs text-purple-300">⚡ مصرف شده</span>
+          <span class="text-sm font-bold text-pink-400">{{ used_gb }} GB</span>
+        </div>
+        <div class="flex justify-between bg-black/40 p-3 rounded-xl border border-purple-500/20">
+          <span class="text-xs text-purple-300">💎 باقی‌مانده</span>
+          <span class="text-sm font-bold text-green-400">{{ remaining_gb }} GB</span>
+        </div>
+        <div class="flex justify-between bg-black/40 p-3 rounded-xl border border-purple-500/20">
+          <span class="text-xs text-purple-300">⏳ روزهای باقی‌مانده</span>
+          <span class="text-sm font-bold text-yellow-400">{{ days_left }} روز</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QR کد ساب -->
+  <div class="cosmic-card rounded-3xl p-6 text-center">
+    <h3 class="text-md font-bold gradient-text mb-3">📱 اسکن سریع لینک ساب</h3>
+    <p class="text-[11px] text-purple-300 mb-4">این QR رو با برنامه فیلترشکنت اسکن کن تا هر ۵ کانفیگ یکجا اضافه بشن</p>
+    <div class="flex justify-center">
+      <div id="subQR" class="p-3 bg-white rounded-2xl inline-block"></div>
+    </div>
+    <div class="mt-4 grid grid-cols-2 gap-2">
+      <button onclick="copySubLink()" class="btn-cosmic py-2 rounded-xl text-xs text-white font-bold">
+        📋 کپی لینک ساب
+      </button>
+      <button onclick="copyAllConfigs()" class="py-2 bg-pink-500/30 border border-pink-500/40 text-pink-200 hover:bg-pink-500/50 rounded-xl text-xs font-bold">
+        🚀 کپی همه کانفیگ‌ها
+      </button>
+    </div>
+  </div>
+
+  <!-- لیست کانفیگ‌ها -->
+  <div class="cosmic-card rounded-3xl p-6">
+    <h3 class="text-md font-bold gradient-text mb-4">⚡ کانفیگ‌های اختصاصی شما</h3>
+    <div class="space-y-3">
+      {% for cfg in configs %}
+      <div class="config-item p-3 rounded-2xl">
+        <div class="flex justify-between items-start gap-2 mb-2">
+          <div>
+            <div class="text-xs font-bold text-white">{{ cfg.title }}</div>
+            <div class="text-[10px] text-pink-300">{{ cfg.tag }}</div>
+          </div>
+          <div class="flex gap-1">
+            <button onclick="copyText(`{{ cfg.config }}`)" class="btn-cosmic px-3 py-1 text-[10px] rounded-lg text-white">کپی</button>
+            <button onclick="showMiniQR(`{{ cfg.config }}`, this)" class="px-3 py-1 bg-purple-500/30 border border-purple-500/40 text-purple-200 text-[10px] rounded-lg hover:bg-purple-500/50">QR</button>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="text-center py-6">
+    <div class="text-xs text-purple-400">
+      🚀 Pablo Rail Galaxy Panel 💫
+    </div>
+    <div class="text-[9px] text-purple-500 mt-1">
+      ساخته شده توسط <span class="gradient-text font-bold">Abolfazl Pablo</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- مودال QR -->
+<div id="qrModal" class="hidden fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4" onclick="closeMiniQR()">
+  <div class="cosmic-card rounded-3xl p-6 text-center">
+    <div id="miniQR" class="p-3 bg-white rounded-2xl inline-block"></div>
+    <div class="text-[10px] text-purple-300 mt-3">برای بستن کلیک کنید</div>
+  </div>
+</div>
+
+<script>
+const subLink = "{{ sub_url }}";
+
+// ساخت QR برای لینک ساب
+new QRCode(document.getElementById("subQR"), {
+  text: subLink, width: 180, height: 180,
+  colorDark: "#000", colorLight: "#fff"
+});
+
+function copySubLink() {
+  navigator.clipboard.writeText(subLink);
+  alert('🌌 لینک ساب کپی شد!');
+}
+
+function copyAllConfigs() {
+  const raw = atob("{{ sub_raw }}");
+  navigator.clipboard.writeText(raw);
+  alert('🚀 هر ۵ کانفیگ کپی شد!');
+}
+
+function copyText(txt) {
+  navigator.clipboard.writeText(txt);
+  alert('✨ کانفیگ کپی شد!');
+}
+
+function showMiniQR(cfg) {
+  const modal = document.getElementById('qrModal');
+  const box = document.getElementById('miniQR');
+  box.innerHTML = '';
+  new QRCode(box, { text: cfg, width: 220, height: 220 });
+  modal.classList.remove('hidden');
+}
+function closeMiniQR() {
+  document.getElementById('qrModal').classList.add('hidden');
+}
+</script>
+
+</body>
+</html>
