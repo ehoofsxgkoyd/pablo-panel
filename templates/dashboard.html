@@ -3,341 +3,115 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pablo Rail | پنل مدیریت</title>
+<title>Pablo Rail | داشبورد مدیریت</title>
 <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-
 <style>
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Vazirmatn', sans-serif;
-    -webkit-tap-highlight-color: transparent;
-}
-body {
-    background-color: #0b0f19;
-    color: #f1f5f9;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-}
-.container {
-    width: 100%;
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 16px;
-}
-.card {
-    background: #111827;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 20px;
-    padding: 18px;
-    margin-bottom: 16px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
-}
-.header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-.logo-title {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-.logo-icon {
-    width: 44px;
-    height: 44px;
-    background: linear-gradient(135deg, #06b6d4, #2563eb);
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-    cursor: pointer;
-}
-.btn {
-    border: none;
-    outline: none;
-    padding: 10px 18px;
-    border-radius: 12px;
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-}
-.btn-primary {
-    background: linear-gradient(135deg, #06b6d4, #2563eb);
-    color: #fff;
-    box-shadow: 0 4px 15px rgba(6, 182, 212, 0.3);
-}
-.btn-primary:active { transform: scale(0.96); }
-.btn-cyan {
-    background: rgba(6, 182, 212, 0.15);
-    color: #22d3ee;
-    border: 1px solid rgba(6, 182, 212, 0.3);
-}
-.btn-cyan:active { background: rgba(6, 182, 212, 0.3); }
-.btn-danger {
-    background: rgba(244, 63, 94, 0.15);
-    color: #fb7185;
-    border: 1px solid rgba(244, 63, 94, 0.3);
-}
-.btn-secondary {
-    background: #1e293b;
-    color: #cbd5e1;
-    border: 1px solid #334155;
-}
-
-/* آمارها */
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-    margin-bottom: 16px;
-}
-@media (min-width: 600px) {
-    .stats-grid { grid-template-columns: repeat(4, 1fr); }
-}
-.stat-box {
-    background: #111827;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 16px;
-    padding: 14px;
-    text-align: center;
-}
-.stat-val {
-    font-size: 20px;
-    font-weight: 800;
-    margin-top: 4px;
-}
-.stat-lbl {
-    font-size: 11px;
-    color: #94a3b8;
-}
-
-/* لیست کاربران */
-.user-item {
-    background: #0f172a;
-    border: 1px solid #1e293b;
-    border-radius: 16px;
-    padding: 14px;
-    margin-bottom: 10px;
-}
-.user-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 10px;
-}
-.badge {
-    font-size: 10px;
-    padding: 2px 8px;
-    border-radius: 6px;
-    font-weight: 700;
-}
-.badge-active { background: rgba(16, 185, 129, 0.2); color: #34d399; }
-.badge-inactive { background: rgba(244, 63, 94, 0.2); color: #fb7185; }
-
-.progress-bar {
-    width: 100%;
-    height: 6px;
-    background: #1e293b;
-    border-radius: 4px;
-    overflow: hidden;
-    margin-top: 10px;
-}
-.progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, #06b6d4, #3b82f6);
-    border-radius: 4px;
-    transition: width 0.3s;
-}
-
-/* منوی همبرگری کشویی */
-.drawer {
-    position: fixed;
-    top: 0;
-    right: -280px;
-    width: 260px;
-    height: 100%;
-    background: #0f172a;
-    border-left: 1px solid #1e293b;
-    z-index: 100;
-    padding: 24px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    transition: right 0.3s ease;
-    box-shadow: -10px 0 30px rgba(0,0,0,0.7);
-}
-.drawer.active { right: 0; }
-.drawer-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.6);
-    backdrop-filter: blur(4px);
-    z-index: 99;
-    display: none;
-}
-.drawer-overlay.active { display: block; }
-.drawer-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px;
-    color: #cbd5e1;
-    text-decoration: none;
-    border-radius: 12px;
-    margin-bottom: 6px;
-    cursor: pointer;
-    font-size: 13px;
-}
-.drawer-item:hover, .drawer-item.active { background: #1e293b; color: #38bdf8; }
-
-/* مودال‌ها (Popups) */
-.modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.75);
-    backdrop-filter: blur(6px);
-    z-index: 200;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    padding: 16px;
-}
-.modal-overlay.active { display: flex; }
-.modal-box {
-    background: #111827;
-    border: 1px solid #374151;
-    border-radius: 24px;
-    width: 100%;
-    max-width: 480px;
-    padding: 22px;
-    max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.8);
-}
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid #1f2937;
-    padding-bottom: 12px;
-    margin-bottom: 16px;
-}
-.form-group { margin-bottom: 14px; }
-.form-label { display: block; font-size: 12px; color: #94a3b8; margin-bottom: 6px; }
-.form-input {
-    width: 100%;
-    padding: 12px 14px;
-    background: #0b0f19;
-    border: 1px solid #374151;
-    border-radius: 12px;
-    color: #fff;
-    font-size: 13px;
-    outline: none;
-}
-.form-input:focus { border-color: #06b6d4; }
-
-/* پیام توست (Toast Notification) */
-#toast {
-    position: fixed;
-    bottom: 24px;
-    left: 50%;
-    transform: translateX(-50%) translateY(100px);
-    background: #0284c7;
-    color: white;
-    padding: 12px 24px;
-    border-radius: 30px;
-    font-size: 13px;
-    font-weight: bold;
-    z-index: 300;
-    transition: transform 0.3s ease;
-    box-shadow: 0 10px 25px rgba(2, 132, 199, 0.4);
-}
-#toast.show { transform: translateX(-50%) translateY(0); }
+* { margin:0; padding:0; box-sizing:border-box; font-family:'Vazirmatn', sans-serif; -webkit-tap-highlight-color:transparent; }
+body { background:#0b0f19; color:#f1f5f9; min-height:100vh; display:flex; flex-direction:column; justify-content:space-between; }
+.container { width:100%; max-width:900px; margin:0 auto; padding:16px; }
+.card { background:#111827; border:1px solid rgba(255,255,255,0.08); border-radius:20px; padding:18px; margin-bottom:16px; box-shadow:0 10px 25px rgba(0,0,0,0.4); }
+.header { display:flex; justify-content:space-between; align-items:center; }
+.logo-title { display:flex; align-items:center; gap:12px; }
+.logo-icon { width:42px; height:42px; background:linear-gradient(135deg, #06b6d4, #2563eb); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:20px; cursor:pointer; }
+.btn { border:none; outline:none; padding:9px 16px; border-radius:12px; font-size:12px; font-weight:700; cursor:pointer; transition:all 0.2s; display:inline-flex; align-items:center; justify-content:center; gap:6px; }
+.btn:active { transform:scale(0.96); }
+.btn-primary { background:linear-gradient(135deg, #06b6d4, #2563eb); color:#fff; box-shadow:0 4px 15px rgba(6,182,212,0.3); }
+.btn-cyan { background:rgba(6,182,212,0.15); color:#22d3ee; border:1px solid rgba(6,182,212,0.3); }
+.btn-danger { background:rgba(244,63,94,0.15); color:#fb7185; border:1px solid rgba(244,63,94,0.3); }
+.btn-secondary { background:#1e293b; color:#cbd5e1; border:1px solid #334155; }
+.stats-grid { display:grid; grid-template-columns:repeat(2, 1fr); gap:12px; margin-bottom:16px; }
+@media (min-width:600px) { .stats-grid { grid-template-columns:repeat(4, 1fr); } }
+.stat-box { background:#111827; border:1px solid rgba(255,255,255,0.08); border-radius:16px; padding:14px; text-align:center; }
+.stat-val { font-size:18px; font-weight:800; margin-top:4px; }
+.stat-lbl { font-size:11px; color:#94a3b8; }
+.user-item { background:#0f172a; border:1px solid #1e293b; border-radius:16px; padding:14px; margin-bottom:10px; }
+.user-top { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; }
+.badge { font-size:10px; padding:2px 8px; border-radius:6px; font-weight:700; }
+.badge-active { background:rgba(16,185,129,0.2); color:#34d399; }
+.badge-inactive { background:rgba(244,63,94,0.2); color:#fb7185; }
+.progress-bar { width:100%; height:6px; background:#1e293b; border-radius:4px; overflow:hidden; margin-top:10px; }
+.progress-fill { height:100%; background:linear-gradient(90deg, #06b6d4, #3b82f6); border-radius:4px; transition:width 0.3s; }
+.drawer { position:fixed; top:0; right:-280px; width:260px; height:100%; background:#0f172a; border-left:1px solid #1e293b; z-index:100; padding:24px; display:flex; flex-direction:column; justify-content:space-between; transition:right 0.3s ease; box-shadow:-10px 0 30px rgba(0,0,0,0.7); }
+.drawer.active { right:0; }
+.drawer-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.6); backdrop-filter:blur(4px); z-index:99; display:none; }
+.drawer-overlay.active { display:block; }
+.drawer-item { display:flex; align-items:center; gap:12px; padding:12px; color:#cbd5e1; text-decoration:none; border-radius:12px; margin-bottom:6px; cursor:pointer; font-size:13px; }
+.drawer-item:hover, .drawer-item.active { background:#1e293b; color:#38bdf8; }
+.modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.75); backdrop-filter:blur(6px); z-index:200; display:none; align-items:center; justify-content:center; padding:16px; }
+.modal-overlay.active { display:flex; }
+.modal-box { background:#111827; border:1px solid #374151; border-radius:24px; width:100%; max-width:480px; padding:22px; max-height:90vh; overflow-y:auto; box-shadow:0 20px 40px rgba(0,0,0,0.8); }
+.modal-header { display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #1f2937; padding-bottom:12px; margin-bottom:16px; }
+.form-group { margin-bottom:14px; }
+.form-label { display:block; font-size:12px; color:#94a3b8; margin-bottom:6px; }
+.form-input { width:100%; padding:12px 14px; background:#0b0f19; border:1px solid #374151; border-radius:12px; color:#fff; font-size:13px; outline:none; }
+.form-input:focus { border-color:#06b6d4; }
+#toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(100px); background:#0284c7; color:white; padding:12px 24px; border-radius:30px; font-size:13px; font-weight:bold; z-index:300; transition:transform 0.3s ease; box-shadow:0 10px 25px rgba(2,132,199,0.4); }
+#toast.show { transform:translateX(-50%) translateY(0); }
 </style>
 </head>
 <body>
 
-<!-- منوی کشویی سایدبار -->
 <div id="drawerOverlay" class="drawer-overlay" onclick="toggleDrawer(false)"></div>
 <div id="drawer" class="drawer">
     <div>
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; border-bottom: 1px solid #1e293b; padding-bottom: 14px;">
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <div style="font-size: 22px;">🚆</div>
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; border-bottom:1px solid #1e293b; padding-bottom:14px;">
+            <div style="display:flex; align-items:center; gap:10px;">
+                <div style="font-size:22px;">🚆</div>
                 <div>
-                    <div style="font-weight: 800; color: #fff; font-size: 15px;">Pablo Rail</div>
-                    <div style="font-size: 10px; color: #06b6d4;">پنل اختصاصی</div>
+                    <div style="font-weight:800; color:#fff; font-size:15px;">Pablo Rail</div>
+                    <div style="font-size:10px; color:#06b6d4;">پنل اختصاصی</div>
                 </div>
             </div>
-            <span onclick="toggleDrawer(false)" style="font-size: 20px; cursor: pointer; color: #94a3b8;">✕</span>
+            <span onclick="toggleDrawer(false)" style="font-size:20px; cursor:pointer; color:#94a3b8;">✕</span>
         </div>
 
-        <div class="drawer-item active"><span style="font-size: 16px;">📊</span> داشبورد و آمار</div>
-        <div class="drawer-item" onclick="toggleDrawer(false); openModal('addModal');"><span style="font-size: 16px;">➕</span> ساخت کاربر جدید</div>
-        <div class="drawer-item" onclick="showToast('توسعه داده شده توسط Abolfazl Pablo ❤️');"><span style="font-size: 16px;">ℹ️</span> درباره توسعه‌دهنده</div>
+        <div class="drawer-item active"><span>📊</span> داشبورد و آمار</div>
+        <div class="drawer-item" onclick="toggleDrawer(false); openModal('addModal');"><span>➕</span> ساخت کاربر جدید</div>
+        <div class="drawer-item" onclick="showToast('طراحی و توسعه: Abolfazl Pablo ❤️');"><span>ℹ️</span> درباره توسعه‌دهنده</div>
     </div>
 
-    <div style="border-top: 1px solid #1e293b; padding-top: 14px; text-align: center;">
-        <div style="font-size: 11px; color: #64748b; margin-bottom: 10px;">ساخته شده توسط <b>Abolfazl Pablo</b></div>
-        <a href="/logout" class="btn btn-danger" style="width: 100%; text-decoration: none;">خروج از پنل</a>
+    <div style="border-top:1px solid #1e293b; padding-top:14px; text-align:center;">
+        <div style="font-size:11px; color:#64748b; margin-bottom:10px;">ساخته شده توسط <b>Abolfazl Pablo</b></div>
+        <a href="/logout" class="btn btn-danger" style="width:100%; text-decoration:none;">خروج از پنل</a>
     </div>
 </div>
 
-<!-- محتوای اصلی داشبورد -->
 <div class="container">
-
-    <!-- نوار بالا -->
     <div class="card header">
         <div class="logo-title">
             <div class="logo-icon" onclick="toggleDrawer(true)">☰</div>
             <div>
-                <h1 style="font-size: 17px; font-weight: 900; color: #fff;">Pablo Rail</h1>
-                <p style="font-size: 10px; color: #06b6d4;">پنل مدیریت کاربران VLESS</p>
+                <h1 style="font-size:17px; font-weight:900; color:#fff;">Pablo Rail</h1>
+                <p style="font-size:10px; color:#06b6d4;">پنل مدیریت کاربران VLESS</p>
             </div>
         </div>
-
-        <button onclick="openModal('addModal')" class="btn btn-primary">
-            <span>+</span> کاربر جدید
-        </button>
+        <button onclick="openModal('addModal')" class="btn btn-primary"><span>+</span> کاربر جدید</button>
     </div>
 
-    <!-- آمارها -->
     <div class="stats-grid">
         <div class="stat-box">
             <div class="stat-lbl">👥 کل کاربران</div>
-            <div class="stat-val" style="color: #38bdf8;">{{ total_users }}</div>
+            <div class="stat-val" style="color:#38bdf8;">{{ total_users }}</div>
         </div>
         <div class="stat-box">
             <div class="stat-lbl">✅ کاربران فعال</div>
-            <div class="stat-val" style="color: #34d399;">{{ active_users }}</div>
+            <div class="stat-val" style="color:#34d399;">{{ active_users }}</div>
         </div>
         <div class="stat-box">
             <div class="stat-lbl">📦 کل ترافیک</div>
-            <div class="stat-val" style="color: #818cf8;">{{ total_gb }} GB</div>
+            <div class="stat-val" style="color:#818cf8;">{{ total_gb }} GB</div>
         </div>
         <div class="stat-box">
             <div class="stat-lbl">📊 مصرف کل</div>
-            <div class="stat-val" style="color: #f472b6;">{{ total_used }} GB</div>
+            <div class="stat-val" style="color:#f472b6;">{{ total_used }} GB</div>
         </div>
     </div>
 
-    <!-- لیست کاربران -->
     <div class="card">
-        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1f2937; padding-bottom: 10px; margin-bottom: 14px;">
-            <div style="font-weight: 800; font-size: 14px; color: #f1f5f9;">👤 لیست اکانت‌ها</div>
-            <div style="font-size: 11px; color: #64748b;">تعداد: {{ users|length }}</div>
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #1f2937; padding-bottom:10px; margin-bottom:14px;">
+            <div style="font-weight:800; font-size:14px; color:#f1f5f9;">👤 لیست اکانت‌ها</div>
+            <div style="font-size:11px; color:#64748b;">تعداد: {{ users|length }}</div>
         </div>
 
         {% if users %}
@@ -347,71 +121,63 @@ body {
             <div class="user-item">
                 <div class="user-top">
                     <div>
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <span style="font-weight: 800; font-size: 14px; color: #fff;">{{ user.name }}</span>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <span style="font-weight:800; font-size:14px; color:#fff;">{{ user.name }}</span>
                             {% if user.enabled == 1 %}
                                 <span class="badge badge-active">فعال</span>
                             {% else %}
                                 <span class="badge badge-inactive">غیرفعال</span>
                             {% endif %}
                         </div>
-                        <div style="font-size: 11px; color: #94a3b8; margin-top: 4px;">
+                        <div style="font-size:11px; color:#94a3b8; margin-top:4px;">
                             اعتبار: {{ user.expire_days }} روز | حجم: {{ user.quota_gb }} GB
                         </div>
                     </div>
 
-                    <div style="display: flex; gap: 6px;">
-                        <button onclick="loadUserConfig({{ user.id }})" class="btn btn-cyan" style="padding: 6px 12px; font-size: 12px;">
-                            ⚡ کانفیگ‌ها
-                        </button>
-                        <button onclick="toggleUser({{ user.id }})" class="btn btn-secondary" style="padding: 6px 10px; font-size: 12px;">
-                            {% if user.enabled == 1 %}خاموش{% else %}روشن{% endif %}
-                        </button>
-                        <button onclick="deleteUser({{ user.id }})" class="btn btn-danger" style="padding: 6px 10px; font-size: 12px;">
-                            🗑️
-                        </button>
+                    <div style="display:flex; gap:6px;">
+                        <button onclick="loadUserConfig({{ user.id }})" class="btn btn-cyan" style="padding:6px 12px; font-size:12px;">⚡ کانفیگ‌ها</button>
+                        <button onclick="toggleUser({{ user.id }})" class="btn btn-secondary" style="padding:6px 10px; font-size:12px;">{% if user.enabled == 1 %}خاموش{% else %}روشن{% endif %}</button>
+                        <button onclick="deleteUser({{ user.id }})" class="btn btn-danger" style="padding:6px 10px; font-size:12px;">🗑️</button>
                     </div>
                 </div>
 
                 <div class="progress-bar">
                     <div class="progress-fill" style="width: {{ percent if percent < 100 else 100 }}%;"></div>
                 </div>
-                <div style="display: flex; justify-content: space-between; font-size: 10px; color: #64748b; margin-top: 4px;">
+                <div style="display:flex; justify-content:space-between; font-size:10px; color:#64748b; margin-top:4px;">
                     <span>مصرف: {{ used_gb }} GB</span>
                     <span>{{ percent }}%</span>
                 </div>
             </div>
             {% endfor %}
         {% else %}
-            <div style="text-align: center; padding: 40px 0; color: #64748b;">
-                <div style="font-size: 32px; margin-bottom: 8px;">👥</div>
-                <div style="font-size: 13px;">هنوز کاربری ساخته نشده است!</div>
+            <div style="text-align:center; padding:40px 0; color:#64748b;">
+                <div style="font-size:32px; margin-bottom:8px;">👥</div>
+                <div style="font-size:13px;">هنوز کاربری ساخته نشده است!</div>
             </div>
         {% endif %}
     </div>
-
 </div>
 
-<!-- فوتر -->
-<div style="text-align: center; padding: 18px 0; font-size: 11px; color: #64748b; border-top: 1px solid #1e293b;">
-    طراحی و توسعه توسط <strong style="color: #38bdf8;">Abolfazl Pablo</strong> ❤️
+<div style="text-align:center; padding:18px 0; font-size:11px; color:#64748b; border-top:1px solid #1e293b;">
+    طراحی و توسعه توسط <strong style="color:#38bdf8;">Abolfazl Pablo</strong> ❤️
 </div>
 
-<!-- ۱. مودال ساخت کاربر جدید -->
+<!-- مودال ساخت کاربر -->
 <div id="addModal" class="modal-overlay">
     <div class="modal-box">
         <div class="modal-header">
-            <h3 style="font-size: 15px; font-weight: 800; color: #fff;">➕ ساخت کاربر جدید</h3>
-            <span onclick="closeModal('addModal')" style="cursor: pointer; font-size: 18px; color: #94a3b8;">✕</span>
+            <h3 style="font-size:15px; font-weight:800; color:#fff;">➕ ساخت کاربر جدید</h3>
+            <span onclick="closeModal('addModal')" style="cursor:pointer; font-size:18px; color:#94a3b8;">✕</span>
         </div>
 
         <form id="addUserForm" onsubmit="submitAddUser(event)">
             <div class="form-group">
-                <label class="form-label">نام کاربر (فقط انگلیسی):</label>
-                <input type="text" id="add_name" required class="form-input" placeholder="مثلاً: ali یا user1">
+                <label class="form-label">نام کاربر (انگلیسی):</label>
+                <input type="text" id="add_name" required class="form-input" placeholder="مثلاً ali">
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
                 <div class="form-group">
                     <label class="form-label">حجم (GB):</label>
                     <input type="number" id="add_quota" value="30" required class="form-input">
@@ -422,57 +188,48 @@ body {
                 </div>
             </div>
 
-            <button type="submit" id="addBtnSubmit" class="btn btn-primary" style="width: 100%; padding: 12px; margin-top: 8px;">
-                ایجاد اکانت کاربر
-            </button>
+            <button type="submit" id="addBtnSubmit" class="btn btn-primary" style="width:100%; padding:12px; margin-top:8px;">ایجاد اکانت کاربر</button>
         </form>
     </div>
 </div>
 
-<!-- ۲. مودال نمایش کانفیگ‌ها -->
+<!-- مودال نمایش کانفیگ‌ها -->
 <div id="configModal" class="modal-overlay">
     <div class="modal-box">
         <div class="modal-header">
-            <h3 id="cfgTitle" style="font-size: 15px; font-weight: 800; color: #38bdf8;">⚡ کانفیگ‌ها</h3>
-            <span onclick="closeModal('configModal')" style="cursor: pointer; font-size: 18px; color: #94a3b8;">✕</span>
+            <h3 id="cfgTitle" style="font-size:15px; font-weight:800; color:#38bdf8;">⚡ کانفیگ‌ها</h3>
+            <span onclick="closeModal('configModal')" style="cursor:pointer; font-size:18px; color:#94a3b8;">✕</span>
         </div>
 
-        <!-- لینک ساب -->
-        <div style="background: #0b0f19; padding: 12px; border-radius: 14px; border: 1px solid #1e293b; margin-bottom: 14px;">
-            <div style="font-size: 11px; font-weight: bold; color: #cbd5e1; margin-bottom: 6px;">🔗 لینک ساب (Subscription):</div>
-            <div style="display: flex; gap: 6px;">
-                <input type="text" id="subUrlField" readonly class="form-input" style="padding: 8px; font-size: 11px;">
-                <button onclick="copySubLink()" class="btn btn-primary" style="padding: 8px 12px; font-size: 11px;">کپی</button>
+        <div style="background:#0b0f19; padding:12px; border-radius:14px; border:1px solid #1e293b; margin-bottom:14px;">
+            <div style="font-size:11px; font-weight:bold; color:#cbd5e1; margin-bottom:6px;">🔗 لینک ساب (Subscription):</div>
+            <div style="display:flex; gap:6px;">
+                <input type="text" id="subUrlField" readonly class="form-input" style="padding:8px; font-size:11px;">
+                <button onclick="copySubLink()" class="btn btn-primary" style="padding:8px 12px; font-size:11px;">کپی</button>
             </div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px;">
-                <button onclick="openSubLink()" class="btn btn-secondary" style="font-size: 11px; padding: 8px;">🌐 صفحه وب ساب</button>
-                <button onclick="copyAllConfigs()" class="btn btn-cyan" style="font-size: 11px; padding: 8px;">📋 کپی همه کانفیگ‌ها</button>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px;">
+                <button onclick="openSubLink()" class="btn btn-secondary" style="font-size:11px; padding:8px;">🌐 صفحه وب ساب</button>
+                <button onclick="copyAllConfigs()" class="btn btn-cyan" style="font-size:11px; padding:8px;">📋 کپی همه کانفیگ‌ها</button>
             </div>
         </div>
 
-        <!-- لیست کانفیگ‌ها -->
-        <div id="cfgContainer" style="display: flex; flex-direction: column; gap: 8px;"></div>
+        <div id="cfgContainer" style="display:flex; flex-direction:column; gap:8px;"></div>
 
-        <!-- کیوآرکد -->
-        <div id="qrWrap" style="display: none; flex-direction: column; align-items: center; background: #0b0f19; padding: 14px; border-radius: 16px; margin-top: 12px;">
-            <div id="qrBox" style="background: #fff; padding: 8px; border-radius: 12px;"></div>
-            <div id="qrText" style="font-size: 11px; color: #94a3b8; margin-top: 6px;"></div>
+        <div id="qrWrap" style="display:none; flex-direction:column; align-items:center; background:#0b0f19; padding:14px; border-radius:16px; margin-top:12px;">
+            <div id="qrBox" style="background:#fff; padding:8px; border-radius:12px;"></div>
+            <div id="qrText" style="font-size:11px; color:#94a3b8; margin-top:6px;"></div>
         </div>
 
-        <button onclick="closeModal('configModal')" class="btn btn-secondary" style="width: 100%; margin-top: 14px; padding: 10px;">
-            بستن پنجره
-        </button>
+        <button onclick="closeModal('configModal')" class="btn btn-secondary" style="width:100%; margin-top:14px; padding:10px;">بستن پنجره</button>
     </div>
 </div>
 
-<!-- توست نوتیفیکیشن -->
 <div id="toast">پیام سیستم</div>
 
 <script>
 let currentConfigs = [];
 let currentSub = '';
 
-// نمایش نوتیفیکیشن
 function showToast(msg) {
     const t = document.getElementById('toast');
     t.innerText = msg;
@@ -480,7 +237,6 @@ function showToast(msg) {
     setTimeout(() => { t.classList.remove('show'); }, 2000);
 }
 
-// باز و بسته کردن سایدبار
 function toggleDrawer(open) {
     const drawer = document.getElementById('drawer');
     const overlay = document.getElementById('drawerOverlay');
@@ -493,11 +249,9 @@ function toggleDrawer(open) {
     }
 }
 
-// باز و بسته کردن مودال‌ها
 function openModal(id) { document.getElementById(id).classList.add('active'); }
 function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 
-// ۱. ساخت کاربر
 async function submitAddUser(e) {
     e.preventDefault();
     const name = document.getElementById('add_name').value.trim();
@@ -524,13 +278,12 @@ async function submitAddUser(e) {
             btn.disabled = false;
         }
     } catch (err) {
-        alert('خطای اتصال به سرور!');
+        alert('خطای ارتباط با سرور!');
         btn.innerText = 'ایجاد اکانت کاربر';
         btn.disabled = false;
     }
 }
 
-// ۲. خاموش / روشن کردن اکانت
 async function toggleUser(id) {
     try {
         const res = await fetch('/api/toggle_user/' + id, { method: 'POST' });
@@ -543,7 +296,6 @@ async function toggleUser(id) {
     }
 }
 
-// ۳. حذف کاربر
 async function deleteUser(id) {
     if (!confirm('آیا از حذف این کاربر مطمئن هستید؟')) return;
     try {
@@ -558,7 +310,6 @@ async function deleteUser(id) {
     }
 }
 
-// ۴. دریافت کانفیگ‌ها
 async function loadUserConfig(id) {
     showToast('در حال دریافت کانفیگ‌ها...');
     try {
@@ -576,10 +327,56 @@ async function loadUserConfig(id) {
 
             data.configs.forEach(item => {
                 container.innerHTML += `
-                    <div style="background: #0b0f19; padding: 10px; border-radius: 12px; border: 1px solid #1e293b; display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+                    <div style="background:#0b0f19; padding:10px; border-radius:12px; border:1px solid #1e293b; display:flex; justify-content:space-between; align-items:center; gap:8px;">
                         <div>
-                            <div style="font-size: 12px; font-weight: bold; color: #fff;">${item.title}</div>
-                            <div style="font-size: 10px; color: #64748b;">${item.desc}</div>
+                            <div style="font-size:12px; font-weight:bold; color:#fff;">${item.title}</div>
+                            <div style="font-size:10px; color:#64748b;">${item.desc}</div>
                         </div>
-                        <div style="display: flex; gap: 4px;">
-    
+                        <div style="display:flex; gap:4px;">
+                            <button onclick="copyText('${item.config}')" class="btn btn-cyan" style="padding:5px 10px; font-size:11px;">کپی</button>
+                            <button onclick="showQR('${item.config}', '${item.title}')" class="btn btn-secondary" style="padding:5px 10px; font-size:11px;">QR</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('qrWrap').style.display = 'none';
+            openModal('configModal');
+        }
+    } catch (err) {
+        alert('خطا در دریافت کانفیگ‌ها');
+    }
+}
+
+function copySubLink() {
+    navigator.clipboard.writeText(currentSub);
+    showToast('لینک ساب کپی شد! 📋');
+}
+
+function openSubLink() {
+    window.open(currentSub, '_blank');
+}
+
+function copyAllConfigs() {
+    const all = currentConfigs.map(c => c.config).join('\n');
+    navigator.clipboard.writeText(all);
+    showToast('هر ۵ کانفیگ با موفقیت کپی شدند! 🚀');
+}
+
+function copyText(txt) {
+    navigator.clipboard.writeText(txt);
+    showToast('کانفیگ کپی شد! ✨');
+}
+
+function showQR(cfg, label) {
+    const wrap = document.getElementById('qrWrap');
+    const box = document.getElementById('qrBox');
+    box.innerHTML = '';
+    new QRCode(box, { text: cfg, width: 140, height: 140 });
+    document.getElementById('qrText').innerText = label;
+    wrap.style.display = 'flex';
+}
+</script>
+
+</body>
+</html>
