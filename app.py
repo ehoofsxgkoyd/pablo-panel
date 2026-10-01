@@ -55,46 +55,22 @@ def build_xray_config():
 
     config = {
         "log": {"loglevel": "warning"},
-        "api": {
-            "tag": "api",
-            "services": ["StatsService"]
-        },
+        "api": {"tag": "api", "services": ["StatsService"]},
         "stats": {},
         "inbounds": [
             {
-                "port": XRAY_PORT,
-                "listen": "127.0.0.1",
-                "protocol": "vless",
-                "settings": {
-                    "clients": clients,
-                    "decryption": "none"
-                },
-                "streamSettings": {
-                    "network": "ws",
-                    "wsSettings": {"path": "/ws"}
-                },
+                "port": XRAY_PORT, "listen": "127.0.0.1", "protocol": "vless",
+                "settings": {"clients": clients, "decryption": "none"},
+                "streamSettings": {"network": "ws", "wsSettings": {"path": "/ws"}},
                 "tag": "vless-inbound"
             },
             {
-                "listen": "127.0.0.1",
-                "port": 10001,
-                "protocol": "dokodemo-door",
-                "settings": {
-                    "address": "127.0.0.1"
-                },
-                "tag": "api"
+                "listen": "127.0.0.1", "port": 10001, "protocol": "dokodemo-door",
+                "settings": {"address": "127.0.0.1"}, "tag": "api"
             }
         ],
         "outbounds": [{"protocol": "freedom"}],
-        "routing": {
-            "rules": [
-                {
-                    "inboundTag": ["api"],
-                    "outboundTag": "api",
-                    "type": "field"
-                }
-            ]
-        }
+        "routing": {"rules": [{"inboundTag": ["api"], "outboundTag": "api", "type": "field"}]}
     }
     with open(XRAY_CONFIG_PATH, "w") as f:
         json.dump(config, f, indent=2)
@@ -104,8 +80,7 @@ def restart_xray():
     try:
         subprocess.run(["pkill", "-f", "xray"], check=False)
         time.sleep(1)
-    except Exception:
-        pass
+    except Exception: pass
     subprocess.Popen(
         ["/usr/local/bin/xray/xray", "run", "-c", XRAY_CONFIG_PATH],
         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
@@ -120,11 +95,9 @@ def start_caddy():
     }}"""
     with open("/app/Caddyfile", "w") as f:
         f.write(caddyfile_content.replace("{port}", port))
-    
     try:
         subprocess.run(["pkill", "-f", "caddy"], check=False)
-    except:
-        pass
+    except: pass
     subprocess.Popen(
         ["/usr/local/bin/caddy", "run", "--config", "/app/Caddyfile", "--adapter", "caddyfile"],
         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
@@ -149,7 +122,6 @@ def update_stats_loop():
                         parts = name.split(">>>")
                         email = parts[1]
                         user_traffic[email] = user_traffic.get(email, 0) + value
-                
                 if user_traffic:
                     conn = sqlite3.connect(DB_PATH)
                     c = conn.cursor()
@@ -157,52 +129,35 @@ def update_stats_loop():
                         c.execute("UPDATE users SET used_bytes=? WHERE name=?", (bytes_used, email))
                     conn.commit()
                     conn.close()
-        except Exception:
-            pass
+        except Exception: pass
 
 def make_all_vless_configs(user, host):
     created_dt = datetime.fromisoformat(user['created_at'])
     elapsed_days = (datetime.now() - created_dt).days
     days_left = max(0, user['expire_days'] - elapsed_days)
-    
     used_gb = round(user['used_bytes'] / (1024**3), 2)
     quota_gb = user['quota_gb']
     remaining_gb = max(0.0, round(quota_gb - used_gb, 2))
     u_uuid = user['uuid']
     name = user['name']
-
     status_tag = f"{used_gb}G/{quota_gb}G ({remaining_gb}G) | {days_left}d"
-
     configs = []
-
-    # 1. کانفیگ مستقیم و پایدار (Chrome)
     r1 = urllib.parse.quote(f"pablo-{name} [Direct] | {status_tag}")
     c1 = f"vless://{u_uuid}@{host}:443?path=%2Fws%2F{u_uuid}&security=tls&alpn=http%2F1.1&encryption=none&insecure=0&host={host}&fp=chrome&type=ws&allowInsecure=0&sni={host}#{r1}"
     configs.append({"title": "🚀 کانفیگ اصلی (Chrome TLS)", "tag": "پیشنهادی برای همه اپراتورها", "config": c1})
-
-    # 2. کانفیگ EarlyData ضد فیلتر (مخصوص همراه اول)
     r2 = urllib.parse.quote(f"pablo-{name} [EarlyData] | {status_tag}")
     c2 = f"vless://{u_uuid}@{host}:443?path=%2Fws%2F{u_uuid}%3Fed%3D2560&security=tls&alpn=http%2F1.1&encryption=none&insecure=0&host={host}&fp=chrome&type=ws&allowInsecure=0&sni={host}#{r2}"
     configs.append({"title": "⚡ کانفیگ EarlyData (ضد فیلتر)", "tag": "عالی برای همراه اول و پکت‌لاس", "config": c2})
-
-    # 3. کانفیگ فایرفاکس / مالتی ALPN (مخصوص مخابرات و ADSL)
     r3 = urllib.parse.quote(f"pablo-{name} [Firefox] | {status_tag}")
     c3 = f"vless://{u_uuid}@{host}:443?path=%2Fws%2F{u_uuid}&security=tls&alpn=h2%2Chttp%2F1.1&encryption=none&insecure=0&host={host}&fp=firefox&type=ws&allowInsecure=0&sni={host}#{r3}"
     configs.append({"title": "🛡️ کانفیگ Firefox / H2", "tag": "عالی برای وای‌فای، مخابرات و ایرانسل", "config": c3})
-
-    # 4. کانفیگ سافاری و iOS
     r4 = urllib.parse.quote(f"pablo-{name} [Safari] | {status_tag}")
     c4 = f"vless://{u_uuid}@{host}:443?path=%2Fws%2F{u_uuid}&security=tls&alpn=http%2F1.1&encryption=none&insecure=0&host={host}&fp=safari&type=ws&allowInsecure=0&sni={host}#{r4}"
     configs.append({"title": "📱 کانفیگ Safari / iOS", "tag": "مناسب دستگاه‌های اپل و رایتل", "config": c4})
-
-    # 5. کانفیگ پورت 80 بدون TLS
     r5 = urllib.parse.quote(f"pablo-{name} [HTTP-80] | {status_tag}")
     c5 = f"vless://{u_uuid}@{host}:80?path=%2Fws%2F{u_uuid}&security=none&encryption=none&host={host}&type=ws#{r5}"
     configs.append({"title": "🌐 کانفیگ بدون TLS (پورت 80)", "tag": "زمان قطعی شدید TLS", "config": c5})
-
     return configs
-
-# ============ روت‌ها ============
 
 @app.route('/')
 def home():
@@ -233,24 +188,22 @@ def dashboard():
     users = get_users()
     total_gb = sum(u['quota_gb'] for u in users)
     total_used = sum(u['used_bytes'] for u in users) / (1024**3)
+    active_count = sum(1 for u in users if u['enabled'] == 1)
     return render_template('dashboard.html',
                            users=users,
                            total_users=len(users),
+                           active_users=active_count,
                            total_gb=round(total_gb, 2),
                            total_used=round(total_used, 2))
 
 @app.route('/api/add_user', methods=['POST'])
 def add_user():
-    if 'admin' not in session:
-        return jsonify({"error": "unauthorized"}), 401
+    if 'admin' not in session: return jsonify({"error": "unauthorized"}), 401
     data = request.json or {}
     name = data.get('name', '').strip()
     quota = float(data.get('quota', 10))
     days = int(data.get('days', 30))
-
-    if not name:
-        return jsonify({"error": "نام الزامی است"}), 400
-
+    if not name: return jsonify({"error": "نام الزامی است"}), 400
     user_uuid = str(uuid.uuid4())
     try:
         conn = sqlite3.connect(DB_PATH)
@@ -268,8 +221,7 @@ def add_user():
 
 @app.route('/api/delete_user/<int:user_id>', methods=['POST'])
 def delete_user(user_id):
-    if 'admin' not in session:
-        return jsonify({"error": "unauthorized"}), 401
+    if 'admin' not in session: return jsonify({"error": "unauthorized"}), 401
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute("DELETE FROM users WHERE id=?", (user_id,))
@@ -280,8 +232,7 @@ def delete_user(user_id):
 
 @app.route('/api/toggle_user/<int:user_id>', methods=['POST'])
 def toggle_user(user_id):
-    if 'admin' not in session:
-        return jsonify({"error": "unauthorized"}), 401
+    if 'admin' not in session: return jsonify({"error": "unauthorized"}), 401
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute("SELECT enabled FROM users WHERE id=?", (user_id,))
@@ -302,37 +253,25 @@ def subscription(user_uuid):
     c.execute("SELECT * FROM users WHERE uuid=?", (user_uuid,))
     user = c.fetchone()
     conn.close()
-
     if not user or user['enabled'] == 0:
         return "User not found or disabled", 404
+    
+    # اگر درخواست با یوزر-ایجنت کلاینت‌های V2Ray اومده، base64 خام بده
+    ua = request.headers.get('User-Agent', '').lower()
+    client_keywords = ['v2ray', 'clash', 'sing-box', 'hiddify', 'nekobox', 'streisand', 'foxray', 'shadowrocket', 'v2box']
+    is_client = any(k in ua for k in client_keywords)
 
     host = request.host.split(':')[0]
     all_configs = make_all_vless_configs(user, host)
-    raw_text = "\n".join([item['config'] for item in all_configs])
-    encoded = base64.b64encode(raw_text.encode()).decode()
-    return Response(encoded, mimetype='text/plain')
-
-@app.route('/api/user_config/<int:user_id>')
-def user_config(user_id):
-    if 'admin' not in session:
-        return jsonify({"error": "unauthorized"}), 401
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    c = conn.cursor()
-    c.execute("SELECT * FROM users WHERE id=?", (user_id,))
-    user = c.fetchone()
-    conn.close()
-    if not user:
-        return jsonify({"error": "not found"}), 404
-
-    host = request.host.split(':')[0]
-    configs = make_all_vless_configs(user, host)
-    sub_link = f"{request.host_url}sub/{user['uuid']}"
-    return jsonify({"configs": configs, "sub": sub_link})
-
-if __name__ == '__main__':
-    init_db()
-    start_caddy()
-    threading.Thread(target=restart_xray, daemon=True).start()
-    threading.Thread(target=update_stats_loop, daemon=True).start()
-    app.run(host='127.0.0.1', port=8888)
+    
+    if is_client:
+        raw_text = "\n".join([item['config'] for item in all_configs])
+        encoded = base64.b64encode(raw_text.encode()).decode()
+        return Response(encoded, mimetype='text/plain')
+    else:
+        # نمایش صفحه زیبا در مرورگر
+        created_dt = datetime.fromisoformat(user['created_at'])
+        elapsed_days = (datetime.now() - created_dt).days
+        days_left = max(0, user['expire_days'] - elapsed_days)
+        used_gb = round(user['used_bytes'] / (1024**3), 2)
+        remaining_gb = max(0.0, 
