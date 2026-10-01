@@ -65,20 +65,6 @@ def build_xray_config():
 
     config = {
         "log": {"loglevel": "warning"},
-        "api": {"tag": "api", "services": ["StatsService"]},
-        "stats": {},
-        "policy": {
-            "levels": {
-                "0": {
-                    "statsUserUplink": True,
-                    "statsUserDownlink": True
-                }
-            },
-            "system": {
-                "statsInboundUplink": True,
-                "statsInboundDownlink": True
-            }
-        },
         "inbounds": [
             {
                 "port": XRAY_PORT,
@@ -92,33 +78,17 @@ def build_xray_config():
                     "network": "ws",
                     "security": "none",
                     "wsSettings": {
-                        "path": "/"
+                        "path": "/ws"
                     }
-                },
-                "tag": "vless-inbound"
-            },
-            {
-                "listen": "127.0.0.1",
-                "port": 10001,
-                "protocol": "dokodemo-door",
-                "settings": {"address": "127.0.0.1"},
-                "tag": "api"
+                }
             }
         ],
         "outbounds": [
             {
                 "protocol": "freedom",
-                "tag": "direct",
-                "settings": {
-                    "domainStrategy": "UseIP"
-                }
+                "tag": "direct"
             }
-        ],
-        "routing": {
-            "rules": [
-                {"inboundTag": ["api"], "outboundTag": "api", "type": "field"}
-            ]
-        }
+        ]
     }
     with open(XRAY_CONFIG_PATH, "w") as f:
         json.dump(config, f, indent=2)
@@ -127,7 +97,7 @@ def restart_xray():
     build_xray_config()
     try:
         subprocess.run(["pkill", "-9", "-f", "xray"], check=False)
-        time.sleep(0.5)
+        time.sleep(0.3)
     except Exception:
         pass
     subprocess.Popen(
@@ -150,17 +120,23 @@ http {{
     sendfile on;
     keepalive_timeout 65;
 
+    map $http_upgrade $connection_upgrade {{
+        default upgrade;
+        '' close;
+    }}
+
     server {{
         listen {port};
         server_name _;
 
-        # روت دقیق وب‌سوکت با بازنویسی به ریشه Xray
-        location /ws {{
-            rewrite ^/ws.*$ / break;
+        # روت دقیق وب‌سوکت با بازنویسی مسیر به /ws
+        location ~ ^/ws {{
+            proxy_redirect off;
+            rewrite ^/ws.*$ /ws break;
             proxy_pass http://127.0.0.1:{XRAY_PORT};
             proxy_http_version 1.1;
             proxy_set_header Upgrade $http_upgrade;
-            proxy_set_header Connection "upgrade";
+            proxy_set_header Connection $connection_upgrade;
             proxy_set_header Host $http_host;
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -168,7 +144,7 @@ http {{
             proxy_send_timeout 86400s;
         }}
 
-        # روت پنل وب
+        # پنل مدیریت
         location / {{
             proxy_pass http://127.0.0.1:{FLASK_PORT};
             proxy_set_header Host $http_host;
@@ -184,40 +160,11 @@ http {{
     
     try:
         subprocess.run(["pkill", "-9", "-f", "nginx"], check=False)
-        time.sleep(0.5)
+        time.sleep(0.3)
     except:
         pass
     
     subprocess.Popen(["nginx", "-c", os.path.abspath(NGINX_CONFIG_PATH), "-g", "daemon off;"])
-
-def update_stats_loop():
-    while True:
-        time.sleep(15)
-        try:
-            res = subprocess.run(
-                ["/usr/local/bin/xray/xray", "api", "statsquery", "--server=127.0.0.1:10001"],
-                capture_output=True, text=True, check=False
-            )
-            if res.returncode == 0 and res.stdout:
-                data = json.loads(res.stdout)
-                stats_list = data.get("stat", [])
-                user_traffic = {}
-                for item in stats_list:
-                    name = item.get("name", "")
-                    value = int(item.get("value", 0))
-                    if "user>>>" in name and "traffic>>>" in name:
-                        parts = name.split(">>>")
-                        email = parts[1]
-                        user_traffic[email] = user_traffic.get(email, 0) + value
-                if user_traffic:
-                    conn = get_db()
-                    c = conn.cursor()
-                    for email, bytes_used in user_traffic.items():
-                        c.execute("UPDATE users SET used_bytes=? WHERE name=?", (bytes_used, email))
-                    conn.commit()
-                    conn.close()
-        except Exception:
-            pass
 
 def make_all_vless_configs(user, host):
     created_dt = datetime.fromisoformat(user['created_at'])
@@ -440,5 +387,4 @@ if __name__ == '__main__':
     init_db()
     restart_xray()
     start_nginx()
-    threading.Thread(target=update_stats_loop, daemon=True).start()
     app.run(host='127.0.0.1', port=FLASK_PORT)
