@@ -18,8 +18,10 @@ app.secret_key = os.urandom(24)
 ADMIN_USERNAME = os.environ.get("ADMIN_USER", "admin")
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASS", "admin")
 XRAY_PORT = 10000
+FLASK_PORT = 5000
 DB_PATH = "users.db"
 XRAY_CONFIG_PATH = "xray_config.json"
+NGINX_CONFIG_PATH = "nginx.conf"
 # =======================================
 
 def get_db():
@@ -58,9 +60,8 @@ def build_xray_config():
         if u['enabled'] == 1:
             clients.append({"id": u['uuid'], "email": u['name'], "level": 0})
 
-    # اگر کاربری هنوز ساخته نشده، یک کلاینت پیش‌فرض می‌ذاریم تا Xray کرش نکنه
     if not clients:
-        clients.append({"id": str(uuid.uuid4()), "email": "default", "level": 0})
+        clients.append({"id": str(uuid.uuid4()), "email": "default_user", "level": 0})
 
     config = {
         "log": {"loglevel": "warning"},
@@ -78,7 +79,7 @@ def build_xray_config():
                 "streamSettings": {
                     "network": "ws",
                     "wsSettings": {
-                        "path": "/ws"
+                        "path": "/"
                     }
                 },
                 "tag": "vless-inbound"
@@ -115,34 +116,57 @@ def restart_xray():
         stdout=sys.stdout, stderr=sys.stderr
     )
 
-def start_caddy():
+def start_nginx():
     port = os.environ.get("PORT", "8080")
-    # کانفیگ دقیق Caddy مشابه VodiWalker برای مسیریابی کامل وب‌سوکت
-    caddyfile_content = f""":{port} {{
-    handle /ws* {{
-        rewrite * /ws
-        reverse_proxy 127.0.0.1:10000 {{
-            header_up Host {{host}}
-            header_up X-Real-IP {{remote_host}}
+    
+    nginx_conf = f"""events {{
+    worker_connections 1024;
+}}
+http {{
+    include /etc/nginx/mime.types;
+    default_type application/octet-stream;
+    sendfile on;
+    keepalive_timeout 65;
+
+    server {{
+        listen {port};
+        server_name _;
+
+        # مسیر اتصال VLESS و وب‌سوکت دقیقا مطابق VodiWalker
+        location ^~ /ws {{
+            proxy_redirect off;
+            proxy_pass http://127.0.0.1:{XRAY_PORT}/;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection "upgrade";
+            proxy_set_header Host $http_host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_read_timeout 86400s;
+            proxy_send_timeout 86400s;
+        }}
+
+        # مسیر پنل وب
+        location / {{
+            proxy_pass http://127.0.0.1:{FLASK_PORT};
+            proxy_set_header Host $http_host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
         }}
     }}
-    handle {{
-        reverse_proxy 127.0.0.1:8888
-    }}
-}}"""
-    with open("Caddyfile", "w") as f:
-        f.write(caddyfile_content)
+}}
+"""
+    with open(NGINX_CONFIG_PATH, "w") as f:
+        f.write(nginx_conf)
     
     try:
-        subprocess.run(["pkill", "-9", "-f", "caddy"], check=False)
+        subprocess.run(["nginx", "-s", "stop"], check=False)
         time.sleep(0.5)
     except:
         pass
     
-    subprocess.Popen(
-        ["/usr/local/bin/caddy", "run", "--config", "Caddyfile", "--adapter", "caddyfile"],
-        stdout=sys.stdout, stderr=sys.stderr
-    )
+    subprocess.Popen(["nginx", "-c", os.path.abspath(NGINX_CONFIG_PATH), "-g", "daemon off;"])
 
 def update_stats_loop():
     while True:
@@ -183,13 +207,13 @@ def make_all_vless_configs(user, host):
     u_uuid = user['uuid']
     name = user['name']
     
-    # فرمت دقیق ریمارک کانفیگ دقیقاً مثل نمونه VodiWalker
+    # دقیقاً فرمت ریمارک ارسالی VodiWalker شما
     remark_text = f"{name} | {used_gb:.2f} GB/{quota_gb:.2f} GB (باقی {remaining_gb:.2f} GB) | {days_left}د 0س"
     encoded_remark = urllib.parse.quote(remark_text)
     
     configs = []
     
-    # ۱. کانفیگ اصلی VodiWalker (Chrome TLS)
+    # ۱. کانفیگ اصلی VodiWalker استاندارد TLS
     c1 = (
         f"vless://{u_uuid}@{host}:443"
         f"?path=%2Fws%2F{u_uuid}"
@@ -197,9 +221,9 @@ def make_all_vless_configs(user, host):
         f"&host={host}&fp=chrome&type=ws&allowInsecure=0&sni={host}"
         f"#{encoded_remark}"
     )
-    configs.append({"title": "🚀 کانفیگ اصلی (VodiWalker TLS)", "desc": "مناسب کلیه اپراتورها و پایدار", "config": c1})
+    configs.append({"title": "🚀 کانفیگ اصلی (VodiWalker TLS)", "desc": "پایدارترین اتصال برای تمامی اپراتورها", "config": c1})
     
-    # ۲. کانفیگ ضد فیلتر EarlyData (مخصوص همراه اول و نت‌های دارای اختلال)
+    # ۲. کانفیگ ضد فیلتر EarlyData (برای همراه اول و نت‌های دارای اختلال)
     c2 = (
         f"vless://{u_uuid}@{host}:443"
         f"?path=%2Fws%2F{u_uuid}%3Fed%3D2560"
@@ -207,7 +231,7 @@ def make_all_vless_configs(user, host):
         f"&host={host}&fp=chrome&type=ws&allowInsecure=0&sni={host}"
         f"#{encoded_remark}%20%5BAntiFilter%5D"
     )
-    configs.append({"title": "⚡ کانفیگ ضد فیلتر (EarlyData)", "desc": "بهینه‌شده برای همراه اول و ایرانسل", "config": c2})
+    configs.append({"title": "⚡ کانفیگ ضد فیلتر (EarlyData)", "desc": "مخصوص همراه اول، ایرانسل و رایتل", "config": c2})
     
     # ۳. کانفیگ Firefox / H2
     c3 = (
@@ -217,7 +241,7 @@ def make_all_vless_configs(user, host):
         f"&host={host}&fp=firefox&type=ws&allowInsecure=0&sni={host}"
         f"#{encoded_remark}%20%5BFirefox%5D"
     )
-    configs.append({"title": "🛡️ کانفیگ مالتی ALPN (Firefox)", "desc": "مخصوص وای‌فای، مخابرات و ADSL", "config": c3})
+    configs.append({"title": "🛡️ کانفیگ مالتی ALPN (Firefox)", "desc": "مخصوص اینترنت خانگی، مخابرات و وای‌فای", "config": c3})
     
     # ۴. کانفیگ سافاری iOS (ویتوباکس)
     c4 = (
@@ -227,7 +251,7 @@ def make_all_vless_configs(user, host):
         f"&host={host}&fp=safari&type=ws&allowInsecure=0&sni={host}"
         f"#{encoded_remark}%20%5BSafari-iOS%5D"
     )
-    configs.append({"title": "📱 کانفیگ سافاری (iOS / V2Box)", "desc": "بهینه‌شده برای آیفون و V2Box", "config": c4})
+    configs.append({"title": "📱 کانفیگ سافاری (iOS / V2Box)", "desc": "بهینه‌شده برای گوشی‌های آیفون", "config": c4})
     
     # ۵. کانفیگ پورت ۸۰ بدون TLS
     c5 = (
@@ -236,11 +260,11 @@ def make_all_vless_configs(user, host):
         f"&security=none&encryption=none&host={host}&type=ws"
         f"#{encoded_remark}%20%5BHTTP-80%5D"
     )
-    configs.append({"title": "🌐 کانفیگ بدون TLS (پورت 80)", "desc": "برای زمان مسدودی شدید TLS", "config": c5})
+    configs.append({"title": "🌐 کانفیگ بدون TLS (پورت 80)", "desc": "برای زمان اختلال شدید پروتکل TLS", "config": c5})
     
     return configs
 
-# ============ روت‌های برنامه ============
+# ============ روت‌های فلسک ============
 
 @app.route('/')
 def home():
@@ -393,7 +417,8 @@ def subscription(user_uuid):
 
 if __name__ == '__main__':
     init_db()
-    start_caddy()
-    threading.Thread(target=restart_xray, daemon=True).start()
+    restart_xray()
+    threading.Thread(target=start_nginx, daemon=True).start()
     threading.Thread(target=update_stats_loop, daemon=True).start()
-    app.run(host='127.0.0.1', port=8888)
+    # فلسک به عنوان بک‌اند روی پورت ۵۰۰۰ اجرا می‌شود و انجین‌اکس رابط اصلی است
+    app.run(host='127.0.0.1', port=FLASK_PORT)
