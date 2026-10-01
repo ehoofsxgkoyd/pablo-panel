@@ -14,13 +14,13 @@ from flask import Flask, render_template, request, jsonify, Response, redirect, 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 
-# ======== تنظیمات اصلی پنل =========
+# ======== تنظیمات ورود به پنل =========
 ADMIN_USERNAME = os.environ.get("ADMIN_USER", "admin")
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASS", "admin")
 XRAY_PORT = 10000
 DB_PATH = "users.db"
 XRAY_CONFIG_PATH = "xray_config.json"
-# ====================================
+# =======================================
 
 def get_db():
     conn = sqlite3.connect(DB_PATH, check_same_thread=False)
@@ -56,7 +56,11 @@ def build_xray_config():
     clients = []
     for u in users:
         if u['enabled'] == 1:
-            clients.append({"id": u['uuid'], "email": u['name']})
+            clients.append({"id": u['uuid'], "email": u['name'], "level": 0})
+
+    # اگر کاربری هنوز ساخته نشده، یک کلاینت پیش‌فرض می‌ذاریم تا Xray کرش نکنه
+    if not clients:
+        clients.append({"id": str(uuid.uuid4()), "email": "default", "level": 0})
 
     config = {
         "log": {"loglevel": "warning"},
@@ -64,18 +68,37 @@ def build_xray_config():
         "stats": {},
         "inbounds": [
             {
-                "port": XRAY_PORT, "listen": "127.0.0.1", "protocol": "vless",
-                "settings": {"clients": clients, "decryption": "none"},
-                "streamSettings": {"network": "ws", "wsSettings": {"path": "/ws"}},
+                "port": XRAY_PORT,
+                "listen": "127.0.0.1",
+                "protocol": "vless",
+                "settings": {
+                    "clients": clients,
+                    "decryption": "none"
+                },
+                "streamSettings": {
+                    "network": "ws",
+                    "wsSettings": {
+                        "path": "/ws"
+                    }
+                },
                 "tag": "vless-inbound"
             },
             {
-                "listen": "127.0.0.1", "port": 10001, "protocol": "dokodemo-door",
-                "settings": {"address": "127.0.0.1"}, "tag": "api"
+                "listen": "127.0.0.1",
+                "port": 10001,
+                "protocol": "dokodemo-door",
+                "settings": {"address": "127.0.0.1"},
+                "tag": "api"
             }
         ],
-        "outbounds": [{"protocol": "freedom"}],
-        "routing": {"rules": [{"inboundTag": ["api"], "outboundTag": "api", "type": "field"}]}
+        "outbounds": [
+            {"protocol": "freedom", "tag": "direct"}
+        ],
+        "routing": {
+            "rules": [
+                {"inboundTag": ["api"], "outboundTag": "api", "type": "field"}
+            ]
+        }
     }
     with open(XRAY_CONFIG_PATH, "w") as f:
         json.dump(config, f, indent=2)
@@ -83,20 +106,25 @@ def build_xray_config():
 def restart_xray():
     build_xray_config()
     try:
-        subprocess.run(["pkill", "-f", "xray"], check=False)
-        time.sleep(1)
+        subprocess.run(["pkill", "-9", "-f", "xray"], check=False)
+        time.sleep(0.5)
     except Exception:
         pass
     subprocess.Popen(
         ["/usr/local/bin/xray/xray", "run", "-c", XRAY_CONFIG_PATH],
-        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+        stdout=sys.stdout, stderr=sys.stderr
     )
 
 def start_caddy():
     port = os.environ.get("PORT", "8080")
+    # کانفیگ دقیق Caddy مشابه VodiWalker برای مسیریابی کامل وب‌سوکت
     caddyfile_content = f""":{port} {{
     handle /ws* {{
-        reverse_proxy 127.0.0.1:10000
+        rewrite * /ws
+        reverse_proxy 127.0.0.1:10000 {{
+            header_up Host {{host}}
+            header_up X-Real-IP {{remote_host}}
+        }}
     }}
     handle {{
         reverse_proxy 127.0.0.1:8888
@@ -106,19 +134,19 @@ def start_caddy():
         f.write(caddyfile_content)
     
     try:
-        subprocess.run(["pkill", "-f", "caddy"], check=False)
-        time.sleep(1)
+        subprocess.run(["pkill", "-9", "-f", "caddy"], check=False)
+        time.sleep(0.5)
     except:
         pass
     
     subprocess.Popen(
         ["/usr/local/bin/caddy", "run", "--config", "Caddyfile", "--adapter", "caddyfile"],
-        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+        stdout=sys.stdout, stderr=sys.stderr
     )
 
 def update_stats_loop():
     while True:
-        time.sleep(20)
+        time.sleep(15)
         try:
             res = subprocess.run(
                 ["/usr/local/bin/xray/xray", "api", "statsquery", "--server=127.0.0.1:10001"],
@@ -131,7 +159,7 @@ def update_stats_loop():
                 for item in stats_list:
                     name = item.get("name", "")
                     value = int(item.get("value", 0))
-                    if "user>>>" in name:
+                    if "user>>>" in name and "traffic>>>" in name:
                         parts = name.split(">>>")
                         email = parts[1]
                         user_traffic[email] = user_traffic.get(email, 0) + value
@@ -150,43 +178,69 @@ def make_all_vless_configs(user, host):
     elapsed_days = (datetime.now() - created_dt).days
     days_left = max(0, user['expire_days'] - elapsed_days)
     used_gb = round(user['used_bytes'] / (1024**3), 2)
-    quota_gb = user['quota_gb']
+    quota_gb = round(float(user['quota_gb']), 2)
     remaining_gb = max(0.0, round(quota_gb - used_gb, 2))
     u_uuid = user['uuid']
     name = user['name']
     
-    status_tag = f"{used_gb} GB/{quota_gb} GB (باقی {remaining_gb} GB) | {days_left}د 0س"
+    # فرمت دقیق ریمارک کانفیگ دقیقاً مثل نمونه VodiWalker
+    remark_text = f"{name} | {used_gb:.2f} GB/{quota_gb:.2f} GB (باقی {remaining_gb:.2f} GB) | {days_left}د 0س"
+    encoded_remark = urllib.parse.quote(remark_text)
     
     configs = []
     
-    # ۱. کانفیگ اصلی Chrome TLS
-    r1 = urllib.parse.quote(f"Pablo-{name} | {status_tag}")
-    c1 = f"vless://{u_uuid}@{host}:443?path=%2Fws%2F{u_uuid}&security=tls&alpn=http%2F1.1&encryption=none&insecure=0&host={host}&fp=chrome&type=ws&allowInsecure=0&sni={host}#{r1}"
-    configs.append({"title": "🚀 کانفیگ اصلی TLS (Chrome)", "desc": "پایدار برای کلیه اپراتورها", "config": c1})
+    # ۱. کانفیگ اصلی VodiWalker (Chrome TLS)
+    c1 = (
+        f"vless://{u_uuid}@{host}:443"
+        f"?path=%2Fws%2F{u_uuid}"
+        f"&security=tls&alpn=http%2F1.1&encryption=none&insecure=0"
+        f"&host={host}&fp=chrome&type=ws&allowInsecure=0&sni={host}"
+        f"#{encoded_remark}"
+    )
+    configs.append({"title": "🚀 کانفیگ اصلی (VodiWalker TLS)", "desc": "مناسب کلیه اپراتورها و پایدار", "config": c1})
     
-    # ۲. کانفیگ EarlyData
-    r2 = urllib.parse.quote(f"Pablo-{name} [AntiFilter] | {status_tag}")
-    c2 = f"vless://{u_uuid}@{host}:443?path=%2Fws%2F{u_uuid}%3Fed%3D2560&security=tls&alpn=http%2F1.1&encryption=none&insecure=0&host={host}&fp=chrome&type=ws&allowInsecure=0&sni={host}#{r2}"
-    configs.append({"title": "⚡ کانفیگ ضد فیلتر (EarlyData)", "desc": "مخصوص همراه اول و رایتل", "config": c2})
+    # ۲. کانفیگ ضد فیلتر EarlyData (مخصوص همراه اول و نت‌های دارای اختلال)
+    c2 = (
+        f"vless://{u_uuid}@{host}:443"
+        f"?path=%2Fws%2F{u_uuid}%3Fed%3D2560"
+        f"&security=tls&alpn=http%2F1.1&encryption=none&insecure=0"
+        f"&host={host}&fp=chrome&type=ws&allowInsecure=0&sni={host}"
+        f"#{encoded_remark}%20%5BAntiFilter%5D"
+    )
+    configs.append({"title": "⚡ کانفیگ ضد فیلتر (EarlyData)", "desc": "بهینه‌شده برای همراه اول و ایرانسل", "config": c2})
     
-    # ۳. کانفیگ Firefox / Multi ALPN
-    r3 = urllib.parse.quote(f"Pablo-{name} [Firefox] | {status_tag}")
-    c3 = f"vless://{u_uuid}@{host}:443?path=%2Fws%2F{u_uuid}&security=tls&alpn=h2%2Chttp%2F1.1&encryption=none&insecure=0&host={host}&fp=firefox&type=ws&allowInsecure=0&sni={host}#{r3}"
-    configs.append({"title": "🛡️ کانفیگ مالتی ALPN (Firefox)", "desc": "مخصوص مخابرات و وای‌فای خانگی", "config": c3})
+    # ۳. کانفیگ Firefox / H2
+    c3 = (
+        f"vless://{u_uuid}@{host}:443"
+        f"?path=%2Fws%2F{u_uuid}"
+        f"&security=tls&alpn=h2%2Chttp%2F1.1&encryption=none&insecure=0"
+        f"&host={host}&fp=firefox&type=ws&allowInsecure=0&sni={host}"
+        f"#{encoded_remark}%20%5BFirefox%5D"
+    )
+    configs.append({"title": "🛡️ کانفیگ مالتی ALPN (Firefox)", "desc": "مخصوص وای‌فای، مخابرات و ADSL", "config": c3})
     
-    # ۴. کانفیگ سافاری iOS
-    r4 = urllib.parse.quote(f"Pablo-{name} [Safari-iOS] | {status_tag}")
-    c4 = f"vless://{u_uuid}@{host}:443?path=%2Fws%2F{u_uuid}&security=tls&alpn=http%2F1.1&encryption=none&insecure=0&host={host}&fp=safari&type=ws&allowInsecure=0&sni={host}#{r4}"
-    configs.append({"title": "📱 کانفیگ سافاری (iOS / V2Box)", "desc": "بهینه برای آیفون و ویتوباکس", "config": c4})
+    # ۴. کانفیگ سافاری iOS (ویتوباکس)
+    c4 = (
+        f"vless://{u_uuid}@{host}:443"
+        f"?path=%2Fws%2F{u_uuid}"
+        f"&security=tls&alpn=http%2F1.1&encryption=none&insecure=0"
+        f"&host={host}&fp=safari&type=ws&allowInsecure=0&sni={host}"
+        f"#{encoded_remark}%20%5BSafari-iOS%5D"
+    )
+    configs.append({"title": "📱 کانفیگ سافاری (iOS / V2Box)", "desc": "بهینه‌شده برای آیفون و V2Box", "config": c4})
     
-    # ۵. کانفیگ پورت ۸۰
-    r5 = urllib.parse.quote(f"Pablo-{name} [HTTP-80] | {status_tag}")
-    c5 = f"vless://{u_uuid}@{host}:80?path=%2Fws%2F{u_uuid}&security=none&encryption=none&host={host}&type=ws#{r5}"
-    configs.append({"title": "🌐 کانفیگ بدون TLS (پورت 80)", "desc": "جهت عبور از اختلالات شدید TLS", "config": c5})
+    # ۵. کانفیگ پورت ۸۰ بدون TLS
+    c5 = (
+        f"vless://{u_uuid}@{host}:80"
+        f"?path=%2Fws%2F{u_uuid}"
+        f"&security=none&encryption=none&host={host}&type=ws"
+        f"#{encoded_remark}%20%5BHTTP-80%5D"
+    )
+    configs.append({"title": "🌐 کانفیگ بدون TLS (پورت 80)", "desc": "برای زمان مسدودی شدید TLS", "config": c5})
     
     return configs
 
-# ============ روت‌ها ============
+# ============ روت‌های برنامه ============
 
 @app.route('/')
 def home():
@@ -247,7 +301,7 @@ def add_user():
         restart_xray()
         return jsonify({"status": "success", "message": "کاربر با موفقیت ساخته شد"})
     except sqlite3.IntegrityError:
-        return jsonify({"status": "error", "message": "این نام کاربری قبلاً ثبت شده است"}), 400
+        return jsonify({"status": "error", "message": "این نام کاربری قبلاً وجود دارد"}), 400
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
