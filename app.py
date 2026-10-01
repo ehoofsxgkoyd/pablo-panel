@@ -14,13 +14,13 @@ from flask import Flask, render_template, request, jsonify, Response, redirect, 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 
-# ======== تنظیمات پنل =========
-ADMIN_USERNAME = os.environ.get("ADMIN_USER", "pablo")
-ADMIN_PASSWORD = os.environ.get("ADMIN_PASS", "1234567abol")
+# ======== تنظیمات ورود به پنل =========
+ADMIN_USERNAME = os.environ.get("ADMIN_USER", "admin")
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASS", "admin")
 XRAY_PORT = 10000
 DB_PATH = "users.db"
 XRAY_CONFIG_PATH = "xray_config.json"
-# ==============================
+# =======================================
 
 def get_db():
     conn = sqlite3.connect(DB_PATH, check_same_thread=False)
@@ -155,7 +155,6 @@ def make_all_vless_configs(user, host):
     u_uuid = user['uuid']
     name = user['name']
     
-    # فرمت ریمارک دقیقاً مشابه VodiWalker
     status_tag = f"{used_gb} GB/{quota_gb} GB (باقی {remaining_gb} GB) | {days_left}د 0س"
     
     configs = []
