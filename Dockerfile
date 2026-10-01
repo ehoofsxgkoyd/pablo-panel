@@ -2,7 +2,6 @@ FROM python:3.10-slim
 
 WORKDIR /app
 
-# دانلود و نصب Caddy و Xray Core
 RUN apt-get update && apt-get install -y wget unzip curl procps && \
     wget -q https://github.com/caddyserver/caddy/releases/download/v2.7.6/caddy_2.7.6_linux_amd64.tar.gz && \
     tar -zxvf caddy_2.7.6_linux_amd64.tar.gz caddy && \
