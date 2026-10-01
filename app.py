@@ -1,4 +1,5 @@
 import os
+import sys
 import uuid
 import json
 import base64
@@ -17,8 +18,8 @@ app.secret_key = os.urandom(24)
 ADMIN_USERNAME = os.environ.get("ADMIN_USER", "pablo")
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASS", "pablo123")
 XRAY_PORT = 10000
-DB_PATH = "/app/users.db"
-XRAY_CONFIG_PATH = "/app/xray_config.json"
+DB_PATH = "users.db"
+XRAY_CONFIG_PATH = "xray_config.json"
 # ================================
 
 def init_db():
@@ -80,27 +81,36 @@ def restart_xray():
     try:
         subprocess.run(["pkill", "-f", "xray"], check=False)
         time.sleep(1)
-    except Exception: pass
+    except Exception:
+        pass
     subprocess.Popen(
         ["/usr/local/bin/xray/xray", "run", "-c", XRAY_CONFIG_PATH],
-        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+        stdout=sys.stdout, stderr=sys.stderr
     )
 
 def start_caddy():
     port = os.environ.get("PORT", "8080")
-    caddyfile_content = f""":{{port}} {{
-        rewrite /ws/* /ws
-        reverse_proxy /ws 127.0.0.1:10000
+    # استاندارد رسمی Caddy v2 با Handle Blocks بدون ارور
+    caddyfile_content = f""":{port} {{
+    handle /ws* {{
+        reverse_proxy 127.0.0.1:10000
+    }}
+    handle {{
         reverse_proxy 127.0.0.1:8888
-    }}"""
-    with open("/app/Caddyfile", "w") as f:
-        f.write(caddyfile_content.replace("{port}", port))
+    }}
+}}"""
+    with open("Caddyfile", "w") as f:
+        f.write(caddyfile_content)
+    
     try:
         subprocess.run(["pkill", "-f", "caddy"], check=False)
-    except: pass
+        time.sleep(1)
+    except:
+        pass
+    
     subprocess.Popen(
-        ["/usr/local/bin/caddy", "run", "--config", "/app/Caddyfile", "--adapter", "caddyfile"],
-        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+        ["/usr/local/bin/caddy", "run", "--config", "Caddyfile", "--adapter", "caddyfile"],
+        stdout=sys.stdout, stderr=sys.stderr
     )
 
 def update_stats_loop():
@@ -129,7 +139,8 @@ def update_stats_loop():
                         c.execute("UPDATE users SET used_bytes=? WHERE name=?", (bytes_used, email))
                     conn.commit()
                     conn.close()
-        except Exception: pass
+        except Exception:
+            pass
 
 def make_all_vless_configs(user, host):
     created_dt = datetime.fromisoformat(user['created_at'])
@@ -141,23 +152,37 @@ def make_all_vless_configs(user, host):
     u_uuid = user['uuid']
     name = user['name']
     status_tag = f"{used_gb}G/{quota_gb}G ({remaining_gb}G) | {days_left}d"
+    
     configs = []
+    
+    # 1. Chrome
     r1 = urllib.parse.quote(f"pablo-{name} [Direct] | {status_tag}")
     c1 = f"vless://{u_uuid}@{host}:443?path=%2Fws%2F{u_uuid}&security=tls&alpn=http%2F1.1&encryption=none&insecure=0&host={host}&fp=chrome&type=ws&allowInsecure=0&sni={host}#{r1}"
     configs.append({"title": "🚀 کانفیگ اصلی (Chrome TLS)", "tag": "پیشنهادی برای همه اپراتورها", "config": c1})
+    
+    # 2. EarlyData
     r2 = urllib.parse.quote(f"pablo-{name} [EarlyData] | {status_tag}")
     c2 = f"vless://{u_uuid}@{host}:443?path=%2Fws%2F{u_uuid}%3Fed%3D2560&security=tls&alpn=http%2F1.1&encryption=none&insecure=0&host={host}&fp=chrome&type=ws&allowInsecure=0&sni={host}#{r2}"
     configs.append({"title": "⚡ کانفیگ EarlyData (ضد فیلتر)", "tag": "عالی برای همراه اول و پکت‌لاس", "config": c2})
+    
+    # 3. Firefox
     r3 = urllib.parse.quote(f"pablo-{name} [Firefox] | {status_tag}")
     c3 = f"vless://{u_uuid}@{host}:443?path=%2Fws%2F{u_uuid}&security=tls&alpn=h2%2Chttp%2F1.1&encryption=none&insecure=0&host={host}&fp=firefox&type=ws&allowInsecure=0&sni={host}#{r3}"
     configs.append({"title": "🛡️ کانفیگ Firefox / H2", "tag": "عالی برای وای‌فای، مخابرات و ایرانسل", "config": c3})
+    
+    # 4. Safari
     r4 = urllib.parse.quote(f"pablo-{name} [Safari] | {status_tag}")
     c4 = f"vless://{u_uuid}@{host}:443?path=%2Fws%2F{u_uuid}&security=tls&alpn=http%2F1.1&encryption=none&insecure=0&host={host}&fp=safari&type=ws&allowInsecure=0&sni={host}#{r4}"
     configs.append({"title": "📱 کانفیگ Safari / iOS", "tag": "مناسب دستگاه‌های اپل و رایتل", "config": c4})
+    
+    # 5. Port 80
     r5 = urllib.parse.quote(f"pablo-{name} [HTTP-80] | {status_tag}")
     c5 = f"vless://{u_uuid}@{host}:80?path=%2Fws%2F{u_uuid}&security=none&encryption=none&host={host}&type=ws#{r5}"
     configs.append({"title": "🌐 کانفیگ بدون TLS (پورت 80)", "tag": "زمان قطعی شدید TLS", "config": c5})
+    
     return configs
+
+# ============ روت‌ها ============
 
 @app.route('/')
 def home():
@@ -256,7 +281,6 @@ def subscription(user_uuid):
     if not user or user['enabled'] == 0:
         return "User not found or disabled", 404
     
-    # اگر درخواست با یوزر-ایجنت کلاینت‌های V2Ray اومده، base64 خام بده
     ua = request.headers.get('User-Agent', '').lower()
     client_keywords = ['v2ray', 'clash', 'sing-box', 'hiddify', 'nekobox', 'streisand', 'foxray', 'shadowrocket', 'v2box']
     is_client = any(k in ua for k in client_keywords)
@@ -269,9 +293,46 @@ def subscription(user_uuid):
         encoded = base64.b64encode(raw_text.encode()).decode()
         return Response(encoded, mimetype='text/plain')
     else:
-        # نمایش صفحه زیبا در مرورگر
         created_dt = datetime.fromisoformat(user['created_at'])
         elapsed_days = (datetime.now() - created_dt).days
         days_left = max(0, user['expire_days'] - elapsed_days)
         used_gb = round(user['used_bytes'] / (1024**3), 2)
-        remaining_gb = max(0.0, 
+        remaining_gb = max(0.0, round(user['quota_gb'] - used_gb, 2))
+        percent = (used_gb / user['quota_gb'] * 100) if user['quota_gb'] > 0 else 0
+        
+        raw_text = "\n".join([item['config'] for item in all_configs])
+        encoded_sub = base64.b64encode(raw_text.encode()).decode()
+        
+        return render_template('subscription.html',
+            user_name=user['name'],
+            used_gb=used_gb,
+            quota_gb=user['quota_gb'],
+            remaining_gb=remaining_gb,
+            days_left=days_left,
+            percent=round(percent, 1),
+            configs=all_configs,
+            sub_raw=encoded_sub,
+            sub_url=request.url
+        )
+
+@app.route('/api/user_config/<int:user_id>')
+def user_config(user_id):
+    if 'admin' not in session: return jsonify({"error": "unauthorized"}), 401
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+    c.execute("SELECT * FROM users WHERE id=?", (user_id,))
+    user = c.fetchone()
+    conn.close()
+    if not user: return jsonify({"error": "not found"}), 404
+    host = request.host.split(':')[0]
+    configs = make_all_vless_configs(user, host)
+    sub_link = f"{request.host_url}sub/{user['uuid']}"
+    return jsonify({"configs": configs, "sub": sub_link})
+
+if __name__ == '__main__':
+    init_db()
+    start_caddy()
+    threading.Thread(target=restart_xray, daemon=True).start()
+    threading.Thread(target=update_stats_loop, daemon=True).start()
+    app.run(host='127.0.0.1', port=8888)
