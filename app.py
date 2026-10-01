@@ -67,6 +67,18 @@ def build_xray_config():
         "log": {"loglevel": "warning"},
         "api": {"tag": "api", "services": ["StatsService"]},
         "stats": {},
+        "policy": {
+            "levels": {
+                "0": {
+                    "statsUserUplink": True,
+                    "statsUserDownlink": True
+                }
+            },
+            "system": {
+                "statsInboundUplink": True,
+                "statsInboundDownlink": True
+            }
+        },
         "inbounds": [
             {
                 "port": XRAY_PORT,
@@ -78,6 +90,7 @@ def build_xray_config():
                 },
                 "streamSettings": {
                     "network": "ws",
+                    "security": "none",
                     "wsSettings": {
                         "path": "/"
                     }
@@ -93,7 +106,13 @@ def build_xray_config():
             }
         ],
         "outbounds": [
-            {"protocol": "freedom", "tag": "direct"}
+            {
+                "protocol": "freedom",
+                "tag": "direct",
+                "settings": {
+                    "domainStrategy": "UseIP"
+                }
+            }
         ],
         "routing": {
             "rules": [
@@ -119,10 +138,13 @@ def restart_xray():
 def start_nginx():
     port = os.environ.get("PORT", "8080")
     
-    nginx_conf = f"""events {{
+    nginx_conf = f"""pid /run/nginx.pid;
+error_log /dev/stderr warn;
+events {{
     worker_connections 1024;
 }}
 http {{
+    access_log /dev/stdout;
     include /etc/nginx/mime.types;
     default_type application/octet-stream;
     sendfile on;
@@ -132,10 +154,10 @@ http {{
         listen {port};
         server_name _;
 
-        # مسیر اتصال VLESS و وب‌سوکت دقیقا مطابق VodiWalker
-        location ^~ /ws {{
-            proxy_redirect off;
-            proxy_pass http://127.0.0.1:{XRAY_PORT}/;
+        # روت دقیق وب‌سوکت با بازنویسی به ریشه Xray
+        location /ws {{
+            rewrite ^/ws.*$ / break;
+            proxy_pass http://127.0.0.1:{XRAY_PORT};
             proxy_http_version 1.1;
             proxy_set_header Upgrade $http_upgrade;
             proxy_set_header Connection "upgrade";
@@ -146,7 +168,7 @@ http {{
             proxy_send_timeout 86400s;
         }}
 
-        # مسیر پنل وب
+        # روت پنل وب
         location / {{
             proxy_pass http://127.0.0.1:{FLASK_PORT};
             proxy_set_header Host $http_host;
@@ -161,7 +183,7 @@ http {{
         f.write(nginx_conf)
     
     try:
-        subprocess.run(["nginx", "-s", "stop"], check=False)
+        subprocess.run(["pkill", "-9", "-f", "nginx"], check=False)
         time.sleep(0.5)
     except:
         pass
@@ -207,7 +229,6 @@ def make_all_vless_configs(user, host):
     u_uuid = user['uuid']
     name = user['name']
     
-    # دقیقاً فرمت ریمارک ارسالی VodiWalker شما
     remark_text = f"{name} | {used_gb:.2f} GB/{quota_gb:.2f} GB (باقی {remaining_gb:.2f} GB) | {days_left}د 0س"
     encoded_remark = urllib.parse.quote(remark_text)
     
@@ -223,7 +244,7 @@ def make_all_vless_configs(user, host):
     )
     configs.append({"title": "🚀 کانفیگ اصلی (VodiWalker TLS)", "desc": "پایدارترین اتصال برای تمامی اپراتورها", "config": c1})
     
-    # ۲. کانفیگ ضد فیلتر EarlyData (برای همراه اول و نت‌های دارای اختلال)
+    # ۲. کانفیگ ضد فیلتر EarlyData
     c2 = (
         f"vless://{u_uuid}@{host}:443"
         f"?path=%2Fws%2F{u_uuid}%3Fed%3D2560"
@@ -233,7 +254,7 @@ def make_all_vless_configs(user, host):
     )
     configs.append({"title": "⚡ کانفیگ ضد فیلتر (EarlyData)", "desc": "مخصوص همراه اول، ایرانسل و رایتل", "config": c2})
     
-    # ۳. کانفیگ Firefox / H2
+    # ۳. کانفیگ Firefox
     c3 = (
         f"vless://{u_uuid}@{host}:443"
         f"?path=%2Fws%2F{u_uuid}"
@@ -418,7 +439,6 @@ def subscription(user_uuid):
 if __name__ == '__main__':
     init_db()
     restart_xray()
-    threading.Thread(target=start_nginx, daemon=True).start()
+    start_nginx()
     threading.Thread(target=update_stats_loop, daemon=True).start()
-    # فلسک به عنوان بک‌اند روی پورت ۵۰۰۰ اجرا می‌شود و انجین‌اکس رابط اصلی است
     app.run(host='127.0.0.1', port=FLASK_PORT)
