@@ -71,7 +71,9 @@ def build_xray_config():
                 },
                 "streamSettings": {
                     "network": "ws",
-                    "wsSettings": {"path": "/ws"}
+                    "wsSettings": {
+                        "path": "/"
+                    }
                 },
                 "tag": "vless-inbound"
             },
@@ -113,13 +115,17 @@ def restart_xray():
 
 def start_caddy():
     port = os.environ.get("PORT", "8080")
-    caddyfile_content = f""":{{port}} {{
-        rewrite /ws/* /ws
-        reverse_proxy /ws 127.0.0.1:10000
+    # روت هوشمند وب‌سوکت برای تضمین دریافت ۱۰۰٪ ترافیک
+    caddyfile_content = f""":{port} {{
+        @websocket {{
+            header Connection *Upgrade*
+            header Upgrade websocket
+        }}
+        reverse_proxy @websocket 127.0.0.1:10000
         reverse_proxy 127.0.0.1:8888
     }}"""
     with open("/app/Caddyfile", "w") as f:
-        f.write(caddyfile_content.replace("{port}", port))
+        f.write(caddyfile_content)
     
     try:
         subprocess.run(["pkill", "-f", "caddy"], check=False)
@@ -175,30 +181,30 @@ def make_all_vless_configs(user, host):
 
     configs = []
 
-    # 1. کانفیگ مستقیم و پایدار (Chrome)
-    r1 = urllib.parse.quote(f"pablo-{name} [Direct] | {status_tag}")
-    c1 = f"vless://{u_uuid}@{host}:443?path=%2Fws%2F{u_uuid}&security=tls&alpn=http%2F1.1&encryption=none&insecure=0&host={host}&fp=chrome&type=ws&allowInsecure=0&sni={host}#{r1}"
-    configs.append({"title": "🚀 کانفیگ اصلی (Chrome TLS)", "tag": "پیشنهادی برای همه اپراتورها", "config": c1})
+    # 1. کانفیگ مستقیم با Chrome Fingerprint
+    r1 = urllib.parse.quote(f"pablo-{name} [Chrome-TLS] | {status_tag}")
+    c1 = f"vless://{u_uuid}@{host}:443?path=%2F&security=tls&alpn=http%2F1.1&encryption=none&insecure=0&host={host}&fp=chrome&type=ws&allowInsecure=0&sni={host}#{r1}"
+    configs.append({"title": "🚀 کانفیگ ۱ (Chrome TLS)", "tag": "پیش‌فرض پایدار", "config": c1})
 
-    # 2. کانفیگ EarlyData ضد فیلتر (همراه اول)
+    # 2. کانفیگ با EarlyData برای گذر از فیلترینگ همراه اول
     r2 = urllib.parse.quote(f"pablo-{name} [EarlyData] | {status_tag}")
-    c2 = f"vless://{u_uuid}@{host}:443?path=%2Fws%2F{u_uuid}%3Fed%3D2560&security=tls&alpn=http%2F1.1&encryption=none&insecure=0&host={host}&fp=chrome&type=ws&allowInsecure=0&sni={host}#{r2}"
-    configs.append({"title": "⚡ کانفیگ EarlyData (ضد فیلتر)", "tag": "عالی برای همراه اول و پکت‌لاس", "config": c2})
+    c2 = f"vless://{u_uuid}@{host}:443?path=%2F%3Fed%3D2560&security=tls&alpn=http%2F1.1&encryption=none&insecure=0&host={host}&fp=chrome&type=ws&allowInsecure=0&sni={host}#{r2}"
+    configs.append({"title": "⚡ کانفیگ ۲ (EarlyData ضد فیلتر)", "tag": "مخصوص همراه اول و ایرانسل", "config": c2})
 
-    # 3. کانفیگ فایرفاکس (وای‌فای و مخابرات)
-    r3 = urllib.parse.quote(f"pablo-{name} [Firefox] | {status_tag}")
-    c3 = f"vless://{u_uuid}@{host}:443?path=%2Fws%2F{u_uuid}&security=tls&alpn=h2%2Chttp%2F1.1&encryption=none&insecure=0&host={host}&fp=firefox&type=ws&allowInsecure=0&sni={host}#{r3}"
-    configs.append({"title": "🛡️ کانفیگ Firefox / H2", "tag": "عالی برای وای‌فای، مخابرات و ایرانسل", "config": c3})
+    # 3. کانفیگ ALPN چندگانه (H2 + HTTP/1.1)
+    r3 = urllib.parse.quote(f"pablo-{name} [Multi-ALPN] | {status_tag}")
+    c3 = f"vless://{u_uuid}@{host}:443?path=%2F&security=tls&alpn=h2%2Chttp%2F1.1&encryption=none&insecure=0&host={host}&fp=firefox&type=ws&allowInsecure=0&sni={host}#{r3}"
+    configs.append({"title": "🛡️ کانفیگ ۳ (Firefox / Multi-ALPN)", "tag": "مخصوص وای‌فای و مخابرات", "config": c3})
 
-    # 4. کانفیگ سافاری و iOS
-    r4 = urllib.parse.quote(f"pablo-{name} [Safari] | {status_tag}")
-    c4 = f"vless://{u_uuid}@{host}:443?path=%2Fws%2F{u_uuid}&security=tls&alpn=http%2F1.1&encryption=none&insecure=0&host={host}&fp=safari&type=ws&allowInsecure=0&sni={host}#{r4}"
-    configs.append({"title": "📱 کانفیگ Safari / iOS", "tag": "مناسب دستگاه‌های اپل و رایتل", "config": c4})
+    # 4. کانفیگ رایتل و شاتل
+    r4 = urllib.parse.quote(f"pablo-{name} [Random-FP] | {status_tag}")
+    c4 = f"vless://{u_uuid}@{host}:443?path=%2F&security=tls&alpn=http%2F1.1&encryption=none&insecure=0&host={host}&fp=randomized&type=ws&allowInsecure=0&sni={host}#{r4}"
+    configs.append({"title": "📱 کانفیگ ۴ (Randomized FP)", "tag": "مخصوص رایتل و شاتل", "config": c4})
 
-    # 5. کانفیگ پورت 80 بدون TLS
+    # 5. کانفیگ بدون TLS پورت 80
     r5 = urllib.parse.quote(f"pablo-{name} [HTTP-80] | {status_tag}")
-    c5 = f"vless://{u_uuid}@{host}:80?path=%2Fws%2F{u_uuid}&security=none&encryption=none&host={host}&type=ws#{r5}"
-    configs.append({"title": "🌐 کانفیگ بدون TLS (پورت 80)", "tag": "زمان قطعی شدید TLS", "config": c5})
+    c5 = f"vless://{u_uuid}@{host}:80?path=%2F&security=none&encryption=none&host={host}&type=ws#{r5}"
+    configs.append({"title": "🌐 کانفیگ ۵ (بدون TLS - پورت 80)", "tag": "زمان اختلال سراسری TLS", "config": c5})
 
     return configs
 
