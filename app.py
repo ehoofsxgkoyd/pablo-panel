@@ -14,16 +14,21 @@ from flask import Flask, render_template, request, jsonify, Response, redirect, 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 
-# ======== تنظیمات اصلی =========
+# ======== تنظیمات پنل =========
 ADMIN_USERNAME = os.environ.get("ADMIN_USER", "pablo")
-ADMIN_PASSWORD = os.environ.get("ADMIN_PASS", "pablo123")
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASS", "1234567abol")
 XRAY_PORT = 10000
 DB_PATH = "users.db"
 XRAY_CONFIG_PATH = "xray_config.json"
-# ================================
+# ==============================
+
+def get_db():
+    conn = sqlite3.connect(DB_PATH, check_same_thread=False)
+    conn.row_factory = sqlite3.Row
+    return conn
 
 def init_db():
-    conn = sqlite3.connect(DB_PATH)
+    conn = get_db()
     c = conn.cursor()
     c.execute('''CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -38,9 +43,8 @@ def init_db():
     conn.commit()
     conn.close()
 
-def get_users():
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
+def get_all_users():
+    conn = get_db()
     c = conn.cursor()
     c.execute("SELECT * FROM users ORDER BY id DESC")
     rows = [dict(r) for r in c.fetchall()]
@@ -48,7 +52,7 @@ def get_users():
     return rows
 
 def build_xray_config():
-    users = get_users()
+    users = get_all_users()
     clients = []
     for u in users:
         if u['enabled'] == 1:
@@ -85,12 +89,11 @@ def restart_xray():
         pass
     subprocess.Popen(
         ["/usr/local/bin/xray/xray", "run", "-c", XRAY_CONFIG_PATH],
-        stdout=sys.stdout, stderr=sys.stderr
+        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
     )
 
 def start_caddy():
     port = os.environ.get("PORT", "8080")
-    # استاندارد رسمی Caddy v2 با Handle Blocks بدون ارور
     caddyfile_content = f""":{port} {{
     handle /ws* {{
         reverse_proxy 127.0.0.1:10000
@@ -110,7 +113,7 @@ def start_caddy():
     
     subprocess.Popen(
         ["/usr/local/bin/caddy", "run", "--config", "Caddyfile", "--adapter", "caddyfile"],
-        stdout=sys.stdout, stderr=sys.stderr
+        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
     )
 
 def update_stats_loop():
@@ -133,7 +136,7 @@ def update_stats_loop():
                         email = parts[1]
                         user_traffic[email] = user_traffic.get(email, 0) + value
                 if user_traffic:
-                    conn = sqlite3.connect(DB_PATH)
+                    conn = get_db()
                     c = conn.cursor()
                     for email, bytes_used in user_traffic.items():
                         c.execute("UPDATE users SET used_bytes=? WHERE name=?", (bytes_used, email))
@@ -151,38 +154,40 @@ def make_all_vless_configs(user, host):
     remaining_gb = max(0.0, round(quota_gb - used_gb, 2))
     u_uuid = user['uuid']
     name = user['name']
-    status_tag = f"{used_gb}G/{quota_gb}G ({remaining_gb}G) | {days_left}d"
+    
+    # فرمت ریمارک دقیقاً مشابه VodiWalker
+    status_tag = f"{used_gb} GB/{quota_gb} GB (باقی {remaining_gb} GB) | {days_left}د 0س"
     
     configs = []
     
-    # 1. Chrome
-    r1 = urllib.parse.quote(f"pablo-{name} [Direct] | {status_tag}")
+    # ۱. کانفیگ مستقیم و کروم
+    r1 = urllib.parse.quote(f"Pablo-{name} | {status_tag}")
     c1 = f"vless://{u_uuid}@{host}:443?path=%2Fws%2F{u_uuid}&security=tls&alpn=http%2F1.1&encryption=none&insecure=0&host={host}&fp=chrome&type=ws&allowInsecure=0&sni={host}#{r1}"
-    configs.append({"title": "🚀 کانفیگ اصلی (Chrome TLS)", "tag": "پیشنهادی برای همه اپراتورها", "config": c1})
+    configs.append({"title": "🚀 کانفیگ اصلی TLS (Chrome)", "desc": "پایدارترین کانفیگ برای کلیه اپراتورها", "config": c1})
     
-    # 2. EarlyData
-    r2 = urllib.parse.quote(f"pablo-{name} [EarlyData] | {status_tag}")
+    # ۲. کانفیگ EarlyData ضد فیلتر
+    r2 = urllib.parse.quote(f"Pablo-{name} [AntiFilter] | {status_tag}")
     c2 = f"vless://{u_uuid}@{host}:443?path=%2Fws%2F{u_uuid}%3Fed%3D2560&security=tls&alpn=http%2F1.1&encryption=none&insecure=0&host={host}&fp=chrome&type=ws&allowInsecure=0&sni={host}#{r2}"
-    configs.append({"title": "⚡ کانفیگ EarlyData (ضد فیلتر)", "tag": "عالی برای همراه اول و پکت‌لاس", "config": c2})
+    configs.append({"title": "⚡ کانفیگ ضد فیلتر (EarlyData)", "desc": "مخصوص همراه اول، رایتل و مناطق با اختلال", "config": c2})
     
-    # 3. Firefox
-    r3 = urllib.parse.quote(f"pablo-{name} [Firefox] | {status_tag}")
+    # ۳. کانفیگ فایرفاکس / مالتی ALPN
+    r3 = urllib.parse.quote(f"Pablo-{name} [Firefox] | {status_tag}")
     c3 = f"vless://{u_uuid}@{host}:443?path=%2Fws%2F{u_uuid}&security=tls&alpn=h2%2Chttp%2F1.1&encryption=none&insecure=0&host={host}&fp=firefox&type=ws&allowInsecure=0&sni={host}#{r3}"
-    configs.append({"title": "🛡️ کانفیگ Firefox / H2", "tag": "عالی برای وای‌فای، مخابرات و ایرانسل", "config": c3})
+    configs.append({"title": "🛡️ کانفیگ مالتی ALPN (Firefox)", "desc": "مخصوص اینترنت خانگی، وای‌فای و مخابرات", "config": c3})
     
-    # 4. Safari
-    r4 = urllib.parse.quote(f"pablo-{name} [Safari] | {status_tag}")
+    # ۴. کانفیگ سافاری مخصوص iOS
+    r4 = urllib.parse.quote(f"Pablo-{name} [Safari-iOS] | {status_tag}")
     c4 = f"vless://{u_uuid}@{host}:443?path=%2Fws%2F{u_uuid}&security=tls&alpn=http%2F1.1&encryption=none&insecure=0&host={host}&fp=safari&type=ws&allowInsecure=0&sni={host}#{r4}"
-    configs.append({"title": "📱 کانفیگ Safari / iOS", "tag": "مناسب دستگاه‌های اپل و رایتل", "config": c4})
+    configs.append({"title": "📱 کانفیگ سافاری (iOS / V2Box)", "desc": "بهینه‌شده برای آیفون و ویتوباکس", "config": c4})
     
-    # 5. Port 80
-    r5 = urllib.parse.quote(f"pablo-{name} [HTTP-80] | {status_tag}")
+    # ۵. کانفیگ پورت ۸۰ بدون TLS
+    r5 = urllib.parse.quote(f"Pablo-{name} [HTTP-80] | {status_tag}")
     c5 = f"vless://{u_uuid}@{host}:80?path=%2Fws%2F{u_uuid}&security=none&encryption=none&host={host}&type=ws#{r5}"
-    configs.append({"title": "🌐 کانفیگ بدون TLS (پورت 80)", "tag": "زمان قطعی شدید TLS", "config": c5})
+    configs.append({"title": "🌐 کانفیگ بدون TLS (پورت 80)", "desc": "جهت استفاده در زمان فیلترینگ شدید TLS", "config": c5})
     
     return configs
 
-# ============ روت‌ها ============
+# ============ روت‌های برنامه ============
 
 @app.route('/')
 def home():
@@ -198,7 +203,7 @@ def login():
         if u == ADMIN_USERNAME and p == ADMIN_PASSWORD:
             session['admin'] = True
             return redirect(url_for('dashboard'))
-        return render_template('login.html', error="نام کاربری یا رمز عبور اشتباه است")
+        return render_template('login.html', error="نام کاربری یا رمز عبور اشتباه است!")
     return render_template('login.html', error=None)
 
 @app.route('/logout')
@@ -210,7 +215,7 @@ def logout():
 def dashboard():
     if 'admin' not in session:
         return redirect(url_for('login'))
-    users = get_users()
+    users = get_all_users()
     total_gb = sum(u['quota_gb'] for u in users)
     total_used = sum(u['used_bytes'] for u in users) / (1024**3)
     active_count = sum(1 for u in users if u['enabled'] == 1)
@@ -223,15 +228,16 @@ def dashboard():
 
 @app.route('/api/add_user', methods=['POST'])
 def add_user():
-    if 'admin' not in session: return jsonify({"error": "unauthorized"}), 401
+    if 'admin' not in session: return jsonify({"status": "error", "message": "دسترسی غیرمجاز"}), 401
     data = request.json or {}
     name = data.get('name', '').strip()
-    quota = float(data.get('quota', 10))
+    quota = float(data.get('quota', 30))
     days = int(data.get('days', 30))
-    if not name: return jsonify({"error": "نام الزامی است"}), 400
+    if not name: return jsonify({"status": "error", "message": "نام کاربر الزامی است"}), 400
+    
     user_uuid = str(uuid.uuid4())
     try:
-        conn = sqlite3.connect(DB_PATH)
+        conn = get_db()
         c = conn.cursor()
         c.execute(
             "INSERT INTO users (name, uuid, quota_gb, expire_days, created_at) VALUES (?,?,?,?,?)",
@@ -240,25 +246,27 @@ def add_user():
         conn.commit()
         conn.close()
         restart_xray()
-        return jsonify({"status": "ok", "uuid": user_uuid})
+        return jsonify({"status": "success", "message": "کاربر با موفقیت ساخته شد"})
     except sqlite3.IntegrityError:
-        return jsonify({"error": "این نام کاربری قبلاً ثبت شده است"}), 400
+        return jsonify({"status": "error", "message": "این نام کاربری قبلاً وجود دارد"}), 400
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 @app.route('/api/delete_user/<int:user_id>', methods=['POST'])
 def delete_user(user_id):
-    if 'admin' not in session: return jsonify({"error": "unauthorized"}), 401
-    conn = sqlite3.connect(DB_PATH)
+    if 'admin' not in session: return jsonify({"status": "error"}), 401
+    conn = get_db()
     c = conn.cursor()
     c.execute("DELETE FROM users WHERE id=?", (user_id,))
     conn.commit()
     conn.close()
     restart_xray()
-    return jsonify({"status": "ok"})
+    return jsonify({"status": "success", "message": "کاربر با موفقیت حذف شد"})
 
 @app.route('/api/toggle_user/<int:user_id>', methods=['POST'])
 def toggle_user(user_id):
-    if 'admin' not in session: return jsonify({"error": "unauthorized"}), 401
-    conn = sqlite3.connect(DB_PATH)
+    if 'admin' not in session: return jsonify({"status": "error"}), 401
+    conn = get_db()
     c = conn.cursor()
     c.execute("SELECT enabled FROM users WHERE id=?", (user_id,))
     row = c.fetchone()
@@ -268,12 +276,26 @@ def toggle_user(user_id):
         conn.commit()
     conn.close()
     restart_xray()
-    return jsonify({"status": "ok"})
+    return jsonify({"status": "success", "new_state": new_val})
+
+@app.route('/api/user_config/<int:user_id>')
+def user_config(user_id):
+    if 'admin' not in session: return jsonify({"status": "error"}), 401
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("SELECT * FROM users WHERE id=?", (user_id,))
+    user = c.fetchone()
+    conn.close()
+    if not user: return jsonify({"status": "error", "message": "کاربر یافت نشد"}), 404
+    
+    host = request.host.split(':')[0]
+    configs = make_all_vless_configs(dict(user), host)
+    sub_link = f"{request.host_url}sub/{user['uuid']}"
+    return jsonify({"status": "success", "configs": configs, "sub": sub_link, "user": dict(user)})
 
 @app.route('/sub/<user_uuid>')
 def subscription(user_uuid):
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
+    conn = get_db()
     c = conn.cursor()
     c.execute("SELECT * FROM users WHERE uuid=?", (user_uuid,))
     user = c.fetchone()
@@ -286,27 +308,28 @@ def subscription(user_uuid):
     is_client = any(k in ua for k in client_keywords)
 
     host = request.host.split(':')[0]
-    all_configs = make_all_vless_configs(user, host)
+    user_dict = dict(user)
+    all_configs = make_all_vless_configs(user_dict, host)
     
     if is_client:
         raw_text = "\n".join([item['config'] for item in all_configs])
         encoded = base64.b64encode(raw_text.encode()).decode()
         return Response(encoded, mimetype='text/plain')
     else:
-        created_dt = datetime.fromisoformat(user['created_at'])
+        created_dt = datetime.fromisoformat(user_dict['created_at'])
         elapsed_days = (datetime.now() - created_dt).days
-        days_left = max(0, user['expire_days'] - elapsed_days)
-        used_gb = round(user['used_bytes'] / (1024**3), 2)
-        remaining_gb = max(0.0, round(user['quota_gb'] - used_gb, 2))
-        percent = (used_gb / user['quota_gb'] * 100) if user['quota_gb'] > 0 else 0
+        days_left = max(0, user_dict['expire_days'] - elapsed_days)
+        used_gb = round(user_dict['used_bytes'] / (1024**3), 2)
+        remaining_gb = max(0.0, round(user_dict['quota_gb'] - used_gb, 2))
+        percent = (used_gb / user_dict['quota_gb'] * 100) if user_dict['quota_gb'] > 0 else 0
         
         raw_text = "\n".join([item['config'] for item in all_configs])
         encoded_sub = base64.b64encode(raw_text.encode()).decode()
         
         return render_template('subscription.html',
-            user_name=user['name'],
+            user_name=user_dict['name'],
             used_gb=used_gb,
-            quota_gb=user['quota_gb'],
+            quota_gb=user_dict['quota_gb'],
             remaining_gb=remaining_gb,
             days_left=days_left,
             percent=round(percent, 1),
@@ -314,21 +337,6 @@ def subscription(user_uuid):
             sub_raw=encoded_sub,
             sub_url=request.url
         )
-
-@app.route('/api/user_config/<int:user_id>')
-def user_config(user_id):
-    if 'admin' not in session: return jsonify({"error": "unauthorized"}), 401
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    c = conn.cursor()
-    c.execute("SELECT * FROM users WHERE id=?", (user_id,))
-    user = c.fetchone()
-    conn.close()
-    if not user: return jsonify({"error": "not found"}), 404
-    host = request.host.split(':')[0]
-    configs = make_all_vless_configs(user, host)
-    sub_link = f"{request.host_url}sub/{user['uuid']}"
-    return jsonify({"configs": configs, "sub": sub_link})
 
 if __name__ == '__main__':
     init_db()
