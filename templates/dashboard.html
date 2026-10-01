@@ -4,330 +4,509 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Pablo Rail | پنل مدیریت</title>
-<!-- Tailwind CSS -->
-<script src="https://cdn.tailwindcss.com"></script>
-<!-- فونت وزیر متن -->
 <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet"/>
-<!-- آیکون‌های FontAwesome -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<!-- کتابخانه SweetAlert2 -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<!-- کتابخانه QRCode -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 <style>
-* { font-family: 'Vazirmatn', sans-serif; }
-body { background-color: #0b0f19; color: #f1f5f9; }
-.card-vodi {
-    background: rgba(17, 24, 39, 0.75);
-    backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.07);
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Vazirmatn', sans-serif;
+    -webkit-tap-highlight-color: transparent;
 }
-.sidebar-drawer {
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+body {
+    background-color: #0b0f19;
+    color: #f1f5f9;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
+.container {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 16px;
+}
+.card {
+    background: #111827;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    padding: 18px;
+    margin-bottom: 16px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+}
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.logo-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.logo-icon {
+    width: 44px;
+    height: 44px;
+    background: linear-gradient(135deg, #06b6d4, #2563eb);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    cursor: pointer;
+}
+.btn {
+    border: none;
+    outline: none;
+    padding: 10px 18px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+.btn-primary {
+    background: linear-gradient(135deg, #06b6d4, #2563eb);
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(6, 182, 212, 0.3);
+}
+.btn-primary:active { transform: scale(0.96); }
+.btn-cyan {
+    background: rgba(6, 182, 212, 0.15);
+    color: #22d3ee;
+    border: 1px solid rgba(6, 182, 212, 0.3);
+}
+.btn-cyan:active { background: rgba(6, 182, 212, 0.3); }
+.btn-danger {
+    background: rgba(244, 63, 94, 0.15);
+    color: #fb7185;
+    border: 1px solid rgba(244, 63, 94, 0.3);
+}
+.btn-secondary {
+    background: #1e293b;
+    color: #cbd5e1;
+    border: 1px solid #334155;
+}
+
+/* آمارها */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 16px;
+}
+@media (min-width: 600px) {
+    .stats-grid { grid-template-columns: repeat(4, 1fr); }
+}
+.stat-box {
+    background: #111827;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 14px;
+    text-align: center;
+}
+.stat-val {
+    font-size: 20px;
+    font-weight: 800;
+    margin-top: 4px;
+}
+.stat-lbl {
+    font-size: 11px;
+    color: #94a3b8;
+}
+
+/* لیست کاربران */
+.user-item {
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    border-radius: 16px;
+    padding: 14px;
+    margin-bottom: 10px;
+}
+.user-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+.badge {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-weight: 700;
+}
+.badge-active { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+.badge-inactive { background: rgba(244, 63, 94, 0.2); color: #fb7185; }
+
+.progress-bar {
+    width: 100%;
+    height: 6px;
+    background: #1e293b;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 10px;
+}
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #06b6d4, #3b82f6);
+    border-radius: 4px;
+    transition: width 0.3s;
+}
+
+/* منوی همبرگری کشویی */
+.drawer {
+    position: fixed;
+    top: 0;
+    right: -280px;
+    width: 260px;
+    height: 100%;
+    background: #0f172a;
+    border-left: 1px solid #1e293b;
+    z-index: 100;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: right 0.3s ease;
+    box-shadow: -10px 0 30px rgba(0,0,0,0.7);
+}
+.drawer.active { right: 0; }
+.drawer-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(4px);
+    z-index: 99;
+    display: none;
+}
+.drawer-overlay.active { display: block; }
+.drawer-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    color: #cbd5e1;
+    text-decoration: none;
+    border-radius: 12px;
+    margin-bottom: 6px;
+    cursor: pointer;
+    font-size: 13px;
+}
+.drawer-item:hover, .drawer-item.active { background: #1e293b; color: #38bdf8; }
+
+/* مودال‌ها (Popups) */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(6px);
+    z-index: 200;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+.modal-overlay.active { display: flex; }
+.modal-box {
+    background: #111827;
+    border: 1px solid #374151;
+    border-radius: 24px;
+    width: 100%;
+    max-width: 480px;
+    padding: 22px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+}
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #1f2937;
+    padding-bottom: 12px;
+    margin-bottom: 16px;
+}
+.form-group { margin-bottom: 14px; }
+.form-label { display: block; font-size: 12px; color: #94a3b8; margin-bottom: 6px; }
+.form-input {
+    width: 100%;
+    padding: 12px 14px;
+    background: #0b0f19;
+    border: 1px solid #374151;
+    border-radius: 12px;
+    color: #fff;
+    font-size: 13px;
+    outline: none;
+}
+.form-input:focus { border-color: #06b6d4; }
+
+/* پیام توست (Toast Notification) */
+#toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: #0284c7;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 30px;
+    font-size: 13px;
+    font-weight: bold;
+    z-index: 300;
+    transition: transform 0.3s ease;
+    box-shadow: 0 10px 25px rgba(2, 132, 199, 0.4);
+}
+#toast.show { transform: translateX(-50%) translateY(0); }
 </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between">
+<body>
 
-<!-- منوی سایدبار کشویی (همبرگری) -->
-<div id="drawerOverlay" onclick="closeMenu()" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden transition-opacity"></div>
-<div id="sidebarMenu" class="sidebar-drawer fixed top-0 right-0 h-full w-72 bg-slate-900 border-l border-slate-800 z-50 p-6 flex flex-col justify-between transform translate-x-full shadow-2xl">
-    <div class="space-y-6">
-        <div class="flex items-center justify-between border-b border-slate-800 pb-4">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-lg font-black">
-                    <i class="fa-solid fa-train-subway"></i>
-                </div>
+<!-- منوی کشویی سایدبار -->
+<div id="drawerOverlay" class="drawer-overlay" onclick="toggleDrawer(false)"></div>
+<div id="drawer" class="drawer">
+    <div>
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; border-bottom: 1px solid #1e293b; padding-bottom: 14px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="font-size: 22px;">🚆</div>
                 <div>
-                    <h2 class="font-extrabold text-white text-base">Pablo Rail</h2>
-                    <p class="text-[10px] text-cyan-400">ورژن ۲.۵ پایدار</p>
+                    <div style="font-weight: 800; color: #fff; font-size: 15px;">Pablo Rail</div>
+                    <div style="font-size: 10px; color: #06b6d4;">پنل اختصاصی</div>
                 </div>
             </div>
-            <button onclick="closeMenu()" class="text-slate-400 hover:text-white p-1"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <span onclick="toggleDrawer(false)" style="font-size: 20px; cursor: pointer; color: #94a3b8;">✕</span>
         </div>
 
-        <nav class="space-y-1.5">
-            <a href="/dashboard" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-cyan-500/15 text-cyan-400 font-semibold text-xs">
-                <i class="fa-solid fa-chart-pie w-5"></i> داشبورد و آمار
-            </a>
-            <button onclick="openAddModal(); closeMenu();" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 text-slate-300 text-xs transition">
-                <i class="fa-solid fa-user-plus w-5"></i> افزودن کاربر جدید
-            </button>
-            <button onclick="Swal.fire('درباره پنل', 'پنل هوشمند ساخت و مدیریت کانفیگ Pablo Rail\nطراحی و توسعه: Abolfazl Pablo', 'info')" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 text-slate-300 text-xs transition">
-                <i class="fa-solid fa-circle-info w-5"></i> درباره پنل
-            </button>
-        </nav>
+        <div class="drawer-item active"><span style="font-size: 16px;">📊</span> داشبورد و آمار</div>
+        <div class="drawer-item" onclick="toggleDrawer(false); openModal('addModal');"><span style="font-size: 16px;">➕</span> ساخت کاربر جدید</div>
+        <div class="drawer-item" onclick="showToast('توسعه داده شده توسط Abolfazl Pablo ❤️');"><span style="font-size: 16px;">ℹ️</span> درباره توسعه‌دهنده</div>
     </div>
 
-    <div class="border-t border-slate-800 pt-4 space-y-3">
-        <div class="text-[11px] text-slate-400 text-center">
-            توسعه‌دهنده: <strong class="text-cyan-400 font-bold">Abolfazl Pablo</strong>
-        </div>
-        <a href="/logout" class="flex items-center justify-center gap-2 w-full py-2.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 rounded-xl text-xs font-bold transition">
-            <i class="fa-solid fa-arrow-right-from-bracket"></i> خروج از حساب
-        </a>
+    <div style="border-top: 1px solid #1e293b; padding-top: 14px; text-align: center;">
+        <div style="font-size: 11px; color: #64748b; margin-bottom: 10px;">ساخته شده توسط <b>Abolfazl Pablo</b></div>
+        <a href="/logout" class="btn btn-danger" style="width: 100%; text-decoration: none;">خروج از پنل</a>
     </div>
 </div>
 
-<!-- کانتینر اصلی -->
-<div class="max-w-5xl mx-auto p-4 md:p-6 w-full space-y-6">
+<!-- محتوای اصلی داشبورد -->
+<div class="container">
 
-    <!-- نوار هدر بالا -->
-    <header class="card-vodi rounded-2xl p-4 flex justify-between items-center shadow-lg">
-        <div class="flex items-center gap-3">
-            <button onclick="openMenu()" class="w-10 h-10 rounded-xl bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-200 transition">
-                <i class="fa-solid fa-bars text-lg"></i>
-            </button>
+    <!-- نوار بالا -->
+    <div class="card header">
+        <div class="logo-title">
+            <div class="logo-icon" onclick="toggleDrawer(true)">☰</div>
             <div>
-                <h1 class="font-extrabold text-base md:text-lg text-white flex items-center gap-2">
-                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">Pablo Rail</span>
-                    <span class="text-[10px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/30">آنلاین</span>
-                </h1>
-                <p class="text-[11px] text-slate-400 hidden md:block">پنل مدیریت سرور و کاربران VLESS</p>
+                <h1 style="font-size: 17px; font-weight: 900; color: #fff;">Pablo Rail</h1>
+                <p style="font-size: 10px; color: #06b6d4;">پنل مدیریت کاربران VLESS</p>
             </div>
         </div>
 
-        <button onclick="openAddModal()" class="px-4 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-cyan-500/20 flex items-center gap-2 transition">
-            <i class="fa-solid fa-plus"></i> کاربر جدید
+        <button onclick="openModal('addModal')" class="btn btn-primary">
+            <span>+</span> کاربر جدید
         </button>
-    </header>
+    </div>
 
-    <!-- کارت‌های آمار اصلی -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-        <div class="card-vodi rounded-2xl p-4 flex items-center gap-3.5">
-            <div class="w-12 h-12 rounded-xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center text-xl">
-                <i class="fa-solid fa-users"></i>
-            </div>
-            <div>
-                <div class="text-lg md:text-xl font-extrabold text-white">{{ total_users }}</div>
-                <div class="text-[11px] text-slate-400">کل کاربران</div>
-            </div>
+    <!-- آمارها -->
+    <div class="stats-grid">
+        <div class="stat-box">
+            <div class="stat-lbl">👥 کل کاربران</div>
+            <div class="stat-val" style="color: #38bdf8;">{{ total_users }}</div>
         </div>
-
-        <div class="card-vodi rounded-2xl p-4 flex items-center gap-3.5">
-            <div class="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-xl">
-                <i class="fa-solid fa-circle-check"></i>
-            </div>
-            <div>
-                <div class="text-lg md:text-xl font-extrabold text-emerald-400">{{ active_users }}</div>
-                <div class="text-[11px] text-slate-400">کاربران فعال</div>
-            </div>
+        <div class="stat-box">
+            <div class="stat-lbl">✅ کاربران فعال</div>
+            <div class="stat-val" style="color: #34d399;">{{ active_users }}</div>
         </div>
-
-        <div class="card-vodi rounded-2xl p-4 flex items-center gap-3.5">
-            <div class="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center text-xl">
-                <i class="fa-solid fa-database"></i>
-            </div>
-            <div>
-                <div class="text-lg md:text-xl font-extrabold text-blue-400">{{ total_gb }} <span class="text-xs">GB</span></div>
-                <div class="text-[11px] text-slate-400">کل ترافیک</div>
-            </div>
+        <div class="stat-box">
+            <div class="stat-lbl">📦 کل ترافیک</div>
+            <div class="stat-val" style="color: #818cf8;">{{ total_gb }} GB</div>
         </div>
-
-        <div class="card-vodi rounded-2xl p-4 flex items-center gap-3.5">
-            <div class="w-12 h-12 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center text-xl">
-                <i class="fa-solid fa-chart-simple"></i>
-            </div>
-            <div>
-                <div class="text-lg md:text-xl font-extrabold text-purple-400">{{ total_used }} <span class="text-xs">GB</span></div>
-                <div class="text-[11px] text-slate-400">مصرف شده</div>
-            </div>
+        <div class="stat-box">
+            <div class="stat-lbl">📊 مصرف کل</div>
+            <div class="stat-val" style="color: #f472b6;">{{ total_used }} GB</div>
         </div>
     </div>
 
     <!-- لیست کاربران -->
-    <div class="card-vodi rounded-2xl p-5 md:p-6 space-y-4">
-        <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-            <h3 class="font-extrabold text-sm md:text-base text-slate-200 flex items-center gap-2">
-                <i class="fa-solid fa-list text-cyan-400"></i> لیست اکانت‌های فعال
-            </h3>
-            <span class="text-xs text-slate-400 font-mono">{{ users|length }} کاربر</span>
+    <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1f2937; padding-bottom: 10px; margin-bottom: 14px;">
+            <div style="font-weight: 800; font-size: 14px; color: #f1f5f9;">👤 لیست اکانت‌ها</div>
+            <div style="font-size: 11px; color: #64748b;">تعداد: {{ users|length }}</div>
         </div>
 
         {% if users %}
-        <div class="space-y-3">
             {% for user in users %}
             {% set used_gb = (user.used_bytes / 1073741824)|round(2) %}
             {% set percent = (user.used_bytes / (user.quota_gb * 1073741824) * 100)|round(1) if user.quota_gb > 0 else 0 %}
-            <div class="bg-slate-900/80 border border-slate-800 hover:border-slate-700 rounded-2xl p-4 transition duration-200 space-y-3">
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
-                    <div class="flex items-center gap-2.5">
-                        <div class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-slate-300 text-xs font-bold font-mono">
-                            {{ loop.index }}
+            <div class="user-item">
+                <div class="user-top">
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="font-weight: 800; font-size: 14px; color: #fff;">{{ user.name }}</span>
+                            {% if user.enabled == 1 %}
+                                <span class="badge badge-active">فعال</span>
+                            {% else %}
+                                <span class="badge badge-inactive">غیرفعال</span>
+                            {% endif %}
                         </div>
-                        <div>
-                            <div class="flex items-center gap-2">
-                                <span class="font-bold text-white text-sm">{{ user.name }}</span>
-                                {% if user.enabled == 1 %}
-                                <span class="text-[10px] bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-md font-semibold">فعال</span>
-                                {% else %}
-                                <span class="text-[10px] bg-rose-500/15 text-rose-400 border border-rose-500/30 px-2 py-0.5 rounded-md font-semibold">غیرفعال</span>
-                                {% endif %}
-                            </div>
-                            <div class="text-[11px] text-slate-400 mt-0.5 font-mono">
-                                انقضا: {{ user.expire_days }} روز اعتبار
-                            </div>
+                        <div style="font-size: 11px; color: #94a3b8; margin-top: 4px;">
+                            اعتبار: {{ user.expire_days }} روز | حجم: {{ user.quota_gb }} GB
                         </div>
                     </div>
 
-                    <!-- دکمه‌های عملیات هر کاربر -->
-                    <div class="flex items-center gap-2 w-full md:w-auto justify-end">
-                        <button onclick="loadUserConfig({{ user.id }})" class="px-3.5 py-1.5 bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-400 rounded-xl text-xs font-bold transition flex items-center gap-1.5">
-                            <i class="fa-solid fa-qrcode"></i> کانفیگ‌ها
+                    <div style="display: flex; gap: 6px;">
+                        <button onclick="loadUserConfig({{ user.id }})" class="btn btn-cyan" style="padding: 6px 12px; font-size: 12px;">
+                            ⚡ کانفیگ‌ها
                         </button>
-                        <button onclick="toggleUser({{ user.id }})" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs transition">
-                            <i class="fa-solid fa-power-off"></i>
+                        <button onclick="toggleUser({{ user.id }})" class="btn btn-secondary" style="padding: 6px 10px; font-size: 12px;">
+                            {% if user.enabled == 1 %}خاموش{% else %}روشن{% endif %}
                         </button>
-                        <button onclick="deleteUser({{ user.id }})" class="px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 rounded-xl text-xs transition">
-                            <i class="fa-solid fa-trash-can"></i>
+                        <button onclick="deleteUser({{ user.id }})" class="btn btn-danger" style="padding: 6px 10px; font-size: 12px;">
+                            🗑️
                         </button>
                     </div>
                 </div>
 
-                <!-- نوار پیشرفت مصرف -->
-                <div class="space-y-1">
-                    <div class="flex justify-between text-[11px] text-slate-400 font-mono">
-                        <span>{{ used_gb }} GB از {{ user.quota_gb }} GB</span>
-                        <span>{{ percent }}%</span>
-                    </div>
-                    <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
-                        <div class="h-2 rounded-full transition-all duration-500 {% if percent > 85 %}bg-rose-500{% elif percent > 50 %}bg-yellow-500{% else %}bg-cyan-500{% endif %}"
-                             style="width: {{ percent if percent < 100 else 100 }}%"></div>
-                    </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: {{ percent if percent < 100 else 100 }}%;"></div>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 10px; color: #64748b; margin-top: 4px;">
+                    <span>مصرف: {{ used_gb }} GB</span>
+                    <span>{{ percent }}%</span>
                 </div>
             </div>
             {% endfor %}
-        </div>
         {% else %}
-        <div class="text-center py-12 space-y-3">
-            <div class="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mx-auto text-slate-500 text-2xl">
-                <i class="fa-solid fa-users-slash"></i>
+            <div style="text-align: center; padding: 40px 0; color: #64748b;">
+                <div style="font-size: 32px; margin-bottom: 8px;">👥</div>
+                <div style="font-size: 13px;">هنوز کاربری ساخته نشده است!</div>
             </div>
-            <p class="text-xs text-slate-400">هنوز هیچ کاربری ساخته نشده است!</p>
-            <button onclick="openAddModal()" class="px-4 py-2 bg-cyan-500/20 text-cyan-400 text-xs font-bold rounded-xl">ساخت اولین کاربر</button>
-        </div>
         {% endif %}
     </div>
 
 </div>
 
-<!-- فوتر پایین صفحه -->
-<footer class="text-center py-5 border-t border-slate-800/80 mt-8">
-    <p class="text-xs text-slate-400">
-        طراحی و توسعه داده شده توسط <strong class="text-cyan-400 font-bold">Abolfazl Pablo</strong> ❤️
-    </p>
-    <p class="text-[10px] text-slate-600 mt-1">Pablo Rail Panel v2.5</p>
-</footer>
+<!-- فوتر -->
+<div style="text-align: center; padding: 18px 0; font-size: 11px; color: #64748b; border-top: 1px solid #1e293b;">
+    طراحی و توسعه توسط <strong style="color: #38bdf8;">Abolfazl Pablo</strong> ❤️
+</div>
 
-<!-- ۱. مودال افزودن کاربر جدید -->
-<div id="addModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="card-vodi rounded-3xl p-6 max-w-md w-full space-y-4 shadow-2xl">
-        <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-            <h3 class="font-extrabold text-sm text-white flex items-center gap-2">
-                <i class="fa-solid fa-user-plus text-cyan-400"></i> ساخت کاربر جدید
-            </h3>
-            <button onclick="closeAddModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+<!-- ۱. مودال ساخت کاربر جدید -->
+<div id="addModal" class="modal-overlay">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3 style="font-size: 15px; font-weight: 800; color: #fff;">➕ ساخت کاربر جدید</h3>
+            <span onclick="closeModal('addModal')" style="cursor: pointer; font-size: 18px; color: #94a3b8;">✕</span>
         </div>
 
-        <form id="addUserForm" onsubmit="submitAddUser(event)" class="space-y-4">
-            <div>
-                <label class="block text-xs font-semibold text-slate-300 mb-1.5">نام کاربری (فقط حروف و عدد انگلیسی):</label>
-                <input type="text" id="add_name" required placeholder="مثلاً: ali یا user1"
-                    class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-sm focus:outline-none focus:border-cyan-400 text-slate-200">
+        <form id="addUserForm" onsubmit="submitAddUser(event)">
+            <div class="form-group">
+                <label class="form-label">نام کاربر (فقط انگلیسی):</label>
+                <input type="text" id="add_name" required class="form-input" placeholder="مثلاً: ali یا user1">
             </div>
 
-            <div class="grid grid-cols-2 gap-3">
-                <div>
-                    <label class="block text-xs font-semibold text-slate-300 mb-1.5">حجم به گیگابایت (GB):</label>
-                    <input type="number" id="add_quota" value="30" required
-                        class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-sm focus:outline-none focus:border-cyan-400 text-slate-200">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div class="form-group">
+                    <label class="form-label">حجم (GB):</label>
+                    <input type="number" id="add_quota" value="30" required class="form-input">
                 </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-300 mb-1.5">تعداد روز اعتبار:</label>
-                    <input type="number" id="add_days" value="30" required
-                        class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-sm focus:outline-none focus:border-cyan-400 text-slate-200">
+                <div class="form-group">
+                    <label class="form-label">روز اعتبار:</label>
+                    <input type="number" id="add_days" value="30" required class="form-input">
                 </div>
             </div>
 
-            <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold rounded-xl shadow-lg transition">
+            <button type="submit" id="addBtnSubmit" class="btn btn-primary" style="width: 100%; padding: 12px; margin-top: 8px;">
                 ایجاد اکانت کاربر
             </button>
         </form>
     </div>
 </div>
 
-<!-- ۲. مودال کانفیگ‌ها و ساب‌لینک کاربر -->
-<div id="configModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="card-vodi rounded-3xl p-6 max-w-lg w-full space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
-        <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-            <h3 id="cfgModalTitle" class="font-extrabold text-sm text-cyan-400 flex items-center gap-2">
-                <i class="fa-solid fa-bolt"></i> کانفیگ‌های اختصاصی
-            </h3>
-            <button onclick="closeConfigModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+<!-- ۲. مودال نمایش کانفیگ‌ها -->
+<div id="configModal" class="modal-overlay">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3 id="cfgTitle" style="font-size: 15px; font-weight: 800; color: #38bdf8;">⚡ کانفیگ‌ها</h3>
+            <span onclick="closeModal('configModal')" style="cursor: pointer; font-size: 18px; color: #94a3b8;">✕</span>
         </div>
 
-        <!-- لینک اشتراک (Sub) -->
-        <div class="bg-slate-900/90 p-3.5 rounded-2xl border border-slate-800 space-y-2">
-            <label class="block text-xs font-bold text-slate-300">🔗 لینک اشتراک کاربر (Subscription):</label>
-            <div class="flex gap-2">
-                <input id="subUrlInput" readonly class="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-400 font-mono">
-                <button onclick="copySubUrl()" class="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold rounded-xl transition">کپی ساب</button>
+        <!-- لینک ساب -->
+        <div style="background: #0b0f19; padding: 12px; border-radius: 14px; border: 1px solid #1e293b; margin-bottom: 14px;">
+            <div style="font-size: 11px; font-weight: bold; color: #cbd5e1; margin-bottom: 6px;">🔗 لینک ساب (Subscription):</div>
+            <div style="display: flex; gap: 6px;">
+                <input type="text" id="subUrlField" readonly class="form-input" style="padding: 8px; font-size: 11px;">
+                <button onclick="copySubLink()" class="btn btn-primary" style="padding: 8px 12px; font-size: 11px;">کپی</button>
             </div>
-            <div class="grid grid-cols-2 gap-2 pt-1">
-                <button onclick="openSubPage()" class="py-2 bg-slate-800 hover:bg-slate-700 text-cyan-300 text-xs rounded-xl font-bold transition flex items-center justify-center gap-1.5">
-                    <i class="fa-solid fa-globe"></i> صفحه وب ساب
-                </button>
-                <button onclick="copyAllVlessConfigs()" class="py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs rounded-xl font-bold transition flex items-center justify-center gap-1.5">
-                    <i class="fa-solid fa-copy"></i> کپی همه کانفیگ‌ها
-                </button>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px;">
+                <button onclick="openSubLink()" class="btn btn-secondary" style="font-size: 11px; padding: 8px;">🌐 صفحه وب ساب</button>
+                <button onclick="copyAllConfigs()" class="btn btn-cyan" style="font-size: 11px; padding: 8px;">📋 کپی همه کانفیگ‌ها</button>
             </div>
         </div>
 
-        <!-- لیست تک تک کانفیگ‌ها -->
-        <div id="configsListContainer" class="space-y-2.5"></div>
+        <!-- لیست کانفیگ‌ها -->
+        <div id="cfgContainer" style="display: flex; flex-direction: column; gap: 8px;"></div>
 
-        <!-- باکس QR Code -->
-        <div id="qrWrapper" class="hidden flex flex-col items-center p-4 bg-slate-900 rounded-2xl border border-slate-800">
-            <div id="qrCodeContainer" class="p-2 bg-white rounded-xl"></div>
-            <span id="qrLabel" class="text-xs text-slate-300 mt-2 font-mono"></span>
+        <!-- کیوآرکد -->
+        <div id="qrWrap" style="display: none; flex-direction: column; align-items: center; background: #0b0f19; padding: 14px; border-radius: 16px; margin-top: 12px;">
+            <div id="qrBox" style="background: #fff; padding: 8px; border-radius: 12px;"></div>
+            <div id="qrText" style="font-size: 11px; color: #94a3b8; margin-top: 6px;"></div>
         </div>
 
-        <button onclick="closeConfigModal()" class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold transition">
+        <button onclick="closeModal('configModal')" class="btn btn-secondary" style="width: 100%; margin-top: 14px; padding: 10px;">
             بستن پنجره
         </button>
     </div>
 </div>
 
+<!-- توست نوتیفیکیشن -->
+<div id="toast">پیام سیستم</div>
+
 <script>
 let currentConfigs = [];
-let currentSubLink = '';
+let currentSub = '';
 
-// مدیریت منو همبرگری
-function openMenu() {
-    document.getElementById('sidebarMenu').classList.remove('translate-x-full');
-    document.getElementById('drawerOverlay').classList.remove('hidden');
-}
-function closeMenu() {
-    document.getElementById('sidebarMenu').classList.add('translate-x-full');
-    document.getElementById('drawerOverlay').classList.add('hidden');
+// نمایش نوتیفیکیشن
+function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.innerText = msg;
+    t.classList.add('show');
+    setTimeout(() => { t.classList.remove('show'); }, 2000);
 }
 
-// مدیریت مودال افزودن کاربر
-function openAddModal() { document.getElementById('addModal').classList.remove('hidden'); }
-function closeAddModal() { document.getElementById('addModal').classList.add('hidden'); }
+// باز و بسته کردن سایدبار
+function toggleDrawer(open) {
+    const drawer = document.getElementById('drawer');
+    const overlay = document.getElementById('drawerOverlay');
+    if (open) {
+        drawer.classList.add('active');
+        overlay.classList.add('active');
+    } else {
+        drawer.classList.remove('active');
+        overlay.classList.remove('active');
+    }
+}
 
-// مدیریت مودال کانفیگ
-function closeConfigModal() { document.getElementById('configModal').classList.add('hidden'); }
+// باز و بسته کردن مودال‌ها
+function openModal(id) { document.getElementById(id).classList.add('active'); }
+function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 
-// ارسال درخواست ساخت کاربر
+// ۱. ساخت کاربر
 async function submitAddUser(e) {
     e.preventDefault();
     const name = document.getElementById('add_name').value.trim();
     const quota = document.getElementById('add_quota').value;
     const days = document.getElementById('add_days').value;
+    const btn = document.getElementById('addBtnSubmit');
 
-    Swal.fire({ title: 'در حال ساخت کاربر...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+    btn.innerText = 'در حال ساخت...';
+    btn.disabled = true;
 
     try {
         const res = await fetch('/api/add_user', {
@@ -337,49 +516,70 @@ async function submitAddUser(e) {
         });
         const data = await res.json();
         if (data.status === 'success') {
-            Swal.fire('موفق!', data.message, 'success').then(() => location.reload());
+            showToast('کاربر با موفقیت ساخته شد! ✅');
+            setTimeout(() => { location.reload(); }, 600);
         } else {
-            Swal.fire('خطا!', data.message, 'error');
+            alert(data.message || 'خطا در ساخت کاربر');
+            btn.innerText = 'ایجاد اکانت کاربر';
+            btn.disabled = false;
         }
     } catch (err) {
-        Swal.fire('خطا!', 'ارتباط با سرور برقرار نشد', 'error');
+        alert('خطای اتصال به سرور!');
+        btn.innerText = 'ایجاد اکانت کاربر';
+        btn.disabled = false;
     }
 }
 
-// تغییر وضعیت فعال / غیرفعال
+// ۲. خاموش / روشن کردن اکانت
 async function toggleUser(id) {
     try {
-        const res = await fetch(`/api/toggle_user/${id}`, { method: 'POST' });
+        const res = await fetch('/api/toggle_user/' + id, { method: 'POST' });
         const data = await res.json();
         if (data.status === 'success') {
             location.reload();
         }
-    } catch (e) {
-        Swal.fire('خطا', 'مشکل در تغییر وضعیت', 'error');
+    } catch (err) {
+        alert('خطا در تغییر وضعیت');
     }
 }
 
-// حذف کاربر
+// ۳. حذف کاربر
 async function deleteUser(id) {
-    const result = await Swal.fire({
-        title: 'آیا مطمئن هستید؟',
-        text: 'این کاربر به طور کامل حذف خواهد شد!',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'بله، حذف کن',
-        cancelButtonText: 'انصراف',
-        confirmButtonColor: '#e11d48'
-    });
-
-    if (result.isConfirmed) {
-        const res = await fetch(`/api/delete_user/${id}`, { method: 'POST' });
+    if (!confirm('آیا از حذف این کاربر مطمئن هستید؟')) return;
+    try {
+        const res = await fetch('/api/delete_user/' + id, { method: 'POST' });
         const data = await res.json();
         if (data.status === 'success') {
-            Swal.fire('حذف شد!', 'کاربر حذف گردید.', 'success').then(() => location.reload());
+            showToast('کاربر حذف شد!');
+            setTimeout(() => { location.reload(); }, 500);
         }
+    } catch (err) {
+        alert('خطا در حذف کاربر');
     }
 }
 
-// بارگذاری اطلاعات و کانفیگ‌های کاربر
+// ۴. دریافت کانفیگ‌ها
 async function loadUserConfig(id) {
-    Swal.fire({ title: 'دریافت کانفیگ‌ها...', 
+    showToast('در حال دریافت کانفیگ‌ها...');
+    try {
+        const res = await fetch('/api/user_config/' + id);
+        const data = await res.json();
+        if (data.status === 'success') {
+            currentConfigs = data.configs;
+            currentSub = data.sub;
+
+            document.getElementById('cfgTitle').innerText = '⚡ کانفیگ‌های: ' + data.user.name;
+            document.getElementById('subUrlField').value = data.sub;
+
+            const container = document.getElementById('cfgContainer');
+            container.innerHTML = '';
+
+            data.configs.forEach(item => {
+                container.innerHTML += `
+                    <div style="background: #0b0f19; padding: 10px; border-radius: 12px; border: 1px solid #1e293b; display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+                        <div>
+                            <div style="font-size: 12px; font-weight: bold; color: #fff;">${item.title}</div>
+                            <div style="font-size: 10px; color: #64748b;">${item.desc}</div>
+                        </div>
+                        <div style="display: flex; gap: 4px;">
+    
