@@ -1,48 +1,283 @@
 <!DOCTYPE html>
-<html lang="fa" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pablo Rail | ورود</title>
-<link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<title>PabloPanel | Login</title>
+
+<link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
+
 <style>
-* { margin:0; padding:0; box-sizing:border-box; font-family:'Vazirmatn', sans-serif; }
-body { background:#0b0f19; color:#f1f5f9; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:16px; }
-.card { background:#111827; border:1px solid #1f2937; border-radius:24px; padding:32px 24px; width:100%; max-width:400px; box-shadow:0 20px 40px rgba(0,0,0,0.6); text-align:center; }
-.logo { width:60px; height:60px; background:linear-gradient(135deg, #06b6d4, #2563eb); border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:26px; margin:0 auto 16px; box-shadow:0 8px 20px rgba(6,182,212,0.3); }
-h1 { font-size:22px; font-weight:900; color:#fff; margin-bottom:4px; }
-p { font-size:12px; color:#94a3b8; margin-bottom:24px; }
-.form-group { text-align:right; margin-bottom:16px; }
-label { display:block; font-size:12px; color:#cbd5e1; margin-bottom:6px; font-weight:600; }
-input { width:100%; padding:12px 14px; background:#0b0f19; border:1px solid #374151; border-radius:12px; color:#fff; font-size:13px; outline:none; }
-input:focus { border-color:#06b6d4; }
-.btn { width:100%; padding:12px; background:linear-gradient(135deg, #06b6d4, #2563eb); border:none; border-radius:12px; color:#fff; font-size:14px; font-weight:800; cursor:pointer; margin-top:8px; box-shadow:0 4px 15px rgba(6,182,212,0.3); }
-.error { background:rgba(244,63,94,0.15); border:1px solid rgba(244,63,94,0.3); color:#fb7185; padding:10px; border-radius:10px; font-size:12px; margin-bottom:16px; }
-.footer { font-size:11px; color:#64748b; margin-top:24px; border-top:1px solid #1f2937; padding-top:14px; }
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+    -webkit-tap-highlight-color:transparent;
+}
+
+:root{
+    --bg:#030712;
+    --card:rgba(8,15,30,.82);
+    --cyan:#00eaff;
+    --blue:#2563ff;
+    --purple:#7c3cff;
+    --text:#f8fafc;
+    --muted:#71809b;
+    --border:rgba(0,234,255,.18);
+}
+
+body{
+    min-height:100vh;
+    background:
+        radial-gradient(circle at 15% 20%,rgba(0,234,255,.12),transparent 28%),
+        radial-gradient(circle at 85% 80%,rgba(124,60,255,.16),transparent 30%),
+        #030712;
+    color:var(--text);
+    font-family:Arial,sans-serif;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:18px;
+    overflow:hidden;
+}
+
+body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    background-image:
+        linear-gradient(rgba(0,234,255,.025) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(0,234,255,.025) 1px,transparent 1px);
+    background-size:45px 45px;
+    mask-image:linear-gradient(to bottom,black,transparent);
+    pointer-events:none;
+}
+
+.login-wrap{
+    width:100%;
+    max-width:410px;
+    position:relative;
+}
+
+.glow{
+    position:absolute;
+    width:180px;
+    height:180px;
+    border-radius:50%;
+    background:#00eaff;
+    filter:blur(100px);
+    opacity:.13;
+    top:-70px;
+    left:-50px;
+    pointer-events:none;
+}
+
+.card{
+    position:relative;
+    padding:35px 23px 22px;
+    border:1px solid var(--border);
+    border-radius:28px;
+    background:var(--card);
+    backdrop-filter:blur(25px);
+    box-shadow:
+        0 0 40px rgba(0,234,255,.07),
+        inset 0 0 30px rgba(0,234,255,.025);
+}
+
+.brand{
+    text-align:center;
+}
+
+.brand h1{
+    font-size:31px;
+    font-weight:900;
+    letter-spacing:2px;
+    background:linear-gradient(
+        90deg,
+        #ffffff,
+        #00eaff,
+        #2563ff,
+        #8b7cff
+    );
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+    background-clip:text;
+    color:transparent;
+    text-shadow:0 0 20px rgba(0,234,255,.18);
+}
+
+.brand p{
+    margin-top:8px;
+    color:var(--muted);
+    font-size:11px;
+    letter-spacing:.8px;
+}
+
+.form{
+    margin-top:28px;
+}
+
+.group{
+    margin-bottom:16px;
+}
+
+label{
+    display:block;
+    margin-bottom:8px;
+    color:#aab8d0;
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:.5px;
+}
+
+input{
+    width:100%;
+    height:50px;
+    padding:0 15px;
+    border-radius:14px;
+    border:1px solid rgba(255,255,255,.08);
+    background:rgba(2,7,18,.85);
+    color:white;
+    outline:none;
+    font-size:13px;
+    transition:.2s;
+}
+
+input:focus{
+    border-color:var(--cyan);
+    box-shadow:0 0 18px rgba(0,234,255,.13);
+}
+
+input::placeholder{
+    color:#3f4c63;
+}
+
+.btn{
+    width:100%;
+    height:52px;
+    border:0;
+    border-radius:15px;
+    margin-top:6px;
+    color:white;
+    font-weight:900;
+    font-size:13px;
+    letter-spacing:.4px;
+    cursor:pointer;
+    background:linear-gradient(
+        100deg,
+        #00bfff,
+        #2563ff,
+        #713cff
+    );
+    box-shadow:
+        0 0 20px rgba(0,191,255,.22),
+        inset 0 1px rgba(255,255,255,.18);
+    transition:.2s;
+}
+
+.btn:active{
+    transform:scale(.98);
+}
+
+.error{
+    margin-bottom:17px;
+    padding:12px;
+    border-radius:13px;
+    text-align:center;
+    color:#ff6b8a;
+    font-size:11px;
+    border:1px solid rgba(255,70,110,.25);
+    background:rgba(255,50,90,.08);
+}
+
+.footer{
+    margin-top:24px;
+    padding-top:17px;
+    border-top:1px solid rgba(255,255,255,.06);
+    text-align:center;
+    color:#4d5b72;
+    font-size:10px;
+}
+
+.footer span{
+    color:#00d9ff;
+    font-weight:800;
+}
+
+@media(max-width:360px){
+
+    .card{
+        padding:30px 18px 20px;
+    }
+
+    .brand h1{
+        font-size:27px;
+    }
+
+}
 </style>
 </head>
-<body>
-<div class="card">
-    <div class="logo">🚆</div>
-    <h1>Pablo Rail</h1>
-    <p>پنل مدیریت هوشمند سرور و کاربران</p>
-    
-    {% if error %}
-    <div class="error">{{ error }}</div>
-    {% endif %}
 
-    <form method="POST">
-        <div class="form-group">
-            <label>نام کاربری:</label>
-            <input type="text" name="username" required autocomplete="off">
+<body>
+
+<div class="login-wrap">
+
+    <div class="glow"></div>
+
+    <div class="card">
+
+        <div class="brand">
+            <h1>PabloPanel</h1>
+            <p>NEON VLESS MANAGEMENT PANEL</p>
         </div>
-        <div class="form-group">
-            <label>رمز عبور:</label>
-            <input type="password" name="password" required autocomplete="off">
+
+        {% if error %}
+        <div class="error" style="margin-top:20px;">
+            {{ error }}
         </div>
-        <button type="submit" class="btn">ورود به پنل مدیریت</button>
-    </form>
-    <div class="footer">ساخته شده توسط <b style="color:#38bdf8;">Abolfazl Pablo</b> ❤️</div>
+        {% endif %}
+
+        <form method="POST" class="form">
+
+            <div class="group">
+                <label>USERNAME</label>
+
+                <input
+                    type="text"
+                    name="username"
+                    placeholder="Enter username"
+                    autocomplete="off"
+                    required
+                >
+            </div>
+
+            <div class="group">
+                <label>PASSWORD</label>
+
+                <input
+                    type="password"
+                    name="password"
+                    placeholder="Enter password"
+                    autocomplete="off"
+                    required
+                >
+            </div>
+
+            <button type="submit" class="btn">
+                ACCESS PANEL
+            </button>
+
+        </form>
+
+        <div class="footer">
+            DESIGNED & DEVELOPED BY
+            <span>PabloPanel</span>
+        </div>
+
+    </div>
+
 </div>
+
 </body>
 </html>
