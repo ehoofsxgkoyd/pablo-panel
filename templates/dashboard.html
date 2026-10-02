@@ -3,15 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-
 <title>PabloPanel | Dashboard</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Vazirmatn:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 <style>
-
 :root{
     --bg:#020712;
     --bg2:#06101f;
@@ -60,6 +57,11 @@ body:before{
     mask-image:linear-gradient(to bottom,black,transparent);
 }
 
+body.rtl,
+body.rtl *{
+    font-family:Vazirmatn,Inter,Arial,sans-serif;
+}
+
 button,input{
     font:inherit;
 }
@@ -73,7 +75,7 @@ button{
     min-height:100vh;
 }
 
-/* ================= SIDEBAR ================= */
+/* SIDEBAR */
 
 .sidebar{
     width:245px;
@@ -89,21 +91,44 @@ button{
     bottom:0;
     z-index:100;
     backdrop-filter:blur(20px);
+    box-shadow:8px 0 35px rgba(0,0,0,.18);
+}
+
+.rtl .sidebar{
+    left:auto;
+    right:0;
+    border-right:0;
+    border-left:1px solid var(--line);
+    box-shadow:-8px 0 35px rgba(0,0,0,.18);
 }
 
 .brand{
     display:flex;
     align-items:center;
+    gap:11px;
     padding:5px 8px 25px;
     border-bottom:1px solid rgba(0,157,255,.12);
     margin-bottom:20px;
+}
+
+.brand-logo{
+    width:44px;
+    height:44px;
+    object-fit:cover;
+    border-radius:12px;
+    display:block;
+    flex-shrink:0;
+    border:1px solid rgba(0,217,255,.28);
+    box-shadow:
+        0 0 12px rgba(0,157,255,.35),
+        0 0 25px rgba(0,157,255,.12);
 }
 
 .brand-name{
     font-size:20px;
     font-weight:900;
     letter-spacing:2px;
-    color:#ffffff;
+    color:#fff;
     text-shadow:
         0 0 8px rgba(0,157,255,.8),
         0 0 18px rgba(0,157,255,.45);
@@ -129,7 +154,7 @@ button{
     align-items:center;
     gap:11px;
     width:100%;
-    padding:12px 12px;
+    padding:12px;
     margin-bottom:5px;
     border-radius:11px;
     color:#7890a8;
@@ -143,15 +168,36 @@ button{
 .nav-item:hover,
 .nav-item.active{
     color:#fff;
-    background:linear-gradient(90deg,rgba(0,157,255,.18),rgba(0,157,255,.04));
+    background:linear-gradient(
+        90deg,
+        rgba(0,157,255,.18),
+        rgba(0,157,255,.04)
+    );
     border-color:rgba(0,157,255,.18);
     box-shadow:inset 3px 0 0 var(--blue);
+}
+
+.rtl .nav-item:hover,
+.rtl .nav-item.active{
+    background:linear-gradient(
+        270deg,
+        rgba(0,157,255,.18),
+        rgba(0,157,255,.04)
+    );
+    box-shadow:inset -3px 0 0 var(--blue);
 }
 
 .nav-icon{
     width:22px;
     text-align:center;
-    font-size:15px;
+    font-size:14px;
+    line-height:1;
+    color:#5d7892;
+}
+
+.nav-item:hover .nav-icon,
+.nav-item.active .nav-icon{
+    color:#00c8ff;
 }
 
 .sidebar-bottom{
@@ -184,7 +230,7 @@ button{
     color:#ff5877;
 }
 
-/* ================= MAIN ================= */
+/* MAIN */
 
 .main{
     width:calc(100% - 245px);
@@ -192,6 +238,13 @@ button{
     padding:22px;
     min-width:0;
 }
+
+.rtl .main{
+    margin-left:0;
+    margin-right:245px;
+}
+
+/* TOPBAR */
 
 .topbar{
     display:flex;
@@ -209,7 +262,8 @@ button{
     border-radius:12px;
     color:#fff;
     background:var(--panel);
-    font-size:20px;
+    font-size:23px;
+    line-height:1;
 }
 
 .page-title h1{
@@ -224,6 +278,31 @@ button{
     margin-top:5px;
 }
 
+.top-actions{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.language-btn{
+    min-width:68px;
+    height:38px;
+    padding:0 12px;
+    border-radius:10px;
+    border:1px solid rgba(0,157,255,.25);
+    background:rgba(0,157,255,.07);
+    color:#00c8ff;
+    font-size:10px;
+    font-weight:800;
+    transition:.2s;
+}
+
+.language-btn:hover{
+    background:rgba(0,157,255,.15);
+    border-color:rgba(0,217,255,.45);
+    box-shadow:0 0 15px rgba(0,157,255,.15);
+}
+
 .profile{
     display:flex;
     align-items:center;
@@ -232,6 +311,10 @@ button{
 
 .profile-info{
     text-align:right;
+}
+
+.rtl .profile-info{
+    text-align:left;
 }
 
 .profile-info strong{
@@ -248,18 +331,26 @@ button{
     width:40px;
     height:40px;
     border-radius:12px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    background:linear-gradient(145deg,#087eea,#00d9ff);
-    box-shadow:0 0 18px rgba(0,157,255,.4);
+    overflow:hidden;
+    border:1px solid rgba(0,217,255,.25);
+    box-shadow:0 0 18px rgba(0,157,255,.3);
 }
 
-/* ================= CARDS ================= */
+.avatar img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+}
+
+/* CARDS */
 
 .card{
-    background:
-        linear-gradient(145deg,rgba(9,28,48,.90),rgba(3,14,27,.92));
+    background:linear-gradient(
+        145deg,
+        rgba(9,28,48,.90),
+        rgba(3,14,27,.92)
+    );
     border:1px solid var(--line);
     border-radius:17px;
     box-shadow:var(--shadow);
@@ -274,9 +365,16 @@ button{
     left:15%;
     right:15%;
     height:1px;
-    background:linear-gradient(90deg,transparent,#00c8ff,transparent);
+    background:linear-gradient(
+        90deg,
+        transparent,
+        #00c8ff,
+        transparent
+    );
     opacity:.5;
 }
+
+/* STATS */
 
 .stats{
     display:grid;
@@ -312,6 +410,9 @@ button{
     border-radius:10px;
     background:rgba(0,157,255,.11);
     border:1px solid rgba(0,157,255,.15);
+    color:#00c8ff;
+    font-size:9px;
+    letter-spacing:1px;
 }
 
 .stat-value{
@@ -326,7 +427,7 @@ button{
     margin-top:5px;
 }
 
-/* ================= CONTENT GRID ================= */
+/* GRID */
 
 .grid{
     display:grid;
@@ -357,6 +458,8 @@ button{
     font-size:9px;
 }
 
+/* SERVER */
+
 .server-status{
     display:flex;
     align-items:center;
@@ -374,6 +477,7 @@ button{
     border-radius:50%;
     background:#00e89a;
     box-shadow:0 0 13px #00e89a;
+    flex-shrink:0;
 }
 
 .status-text strong{
@@ -413,6 +517,8 @@ button{
     margin-top:5px;
 }
 
+/* CHART */
+
 .chart{
     height:145px;
     display:flex;
@@ -431,7 +537,7 @@ button{
     opacity:.8;
 }
 
-/* ================= USERS ================= */
+/* USERS */
 
 .users-card{
     padding:20px;
@@ -477,6 +583,9 @@ button{
     justify-content:center;
     background:rgba(0,157,255,.12);
     color:#00c8ff;
+    font-size:9px;
+    font-weight:900;
+    letter-spacing:1px;
 }
 
 .user-name strong{
@@ -524,6 +633,8 @@ button{
     border:1px solid rgba(255,69,103,.14);
 }
 
+/* BUTTONS */
+
 .actions{
     display:flex;
     gap:5px;
@@ -567,7 +678,7 @@ button{
     color:#00e89a;
 }
 
-/* ================= MODALS ================= */
+/* MODALS */
 
 .overlay{
     position:fixed;
@@ -621,6 +732,8 @@ button{
     border-radius:8px;
 }
 
+/* FORM */
+
 .form-group{
     margin-bottom:13px;
 }
@@ -647,6 +760,8 @@ button{
     border-color:#00aaff;
     box-shadow:0 0 12px rgba(0,157,255,.12);
 }
+
+/* CONFIG */
 
 .config-box{
     background:#020b16;
@@ -704,7 +819,7 @@ button{
     min-width:0;
 }
 
-/* ================= TOAST ================= */
+/* TOAST */
 
 .toast{
     position:fixed;
@@ -727,7 +842,7 @@ button{
     transform:translate(-50%,0);
 }
 
-/* ================= MOBILE ================= */
+/* MOBILE */
 
 @media(max-width:900px){
 
@@ -737,18 +852,35 @@ button{
         box-shadow:10px 0 40px rgba(0,0,0,.6);
     }
 
+    .rtl .sidebar{
+        transform:translateX(105%);
+        box-shadow:-10px 0 40px rgba(0,0,0,.6);
+    }
+
     .sidebar.open{
+        transform:translateX(0);
+    }
+
+    .rtl .sidebar.open{
         transform:translateX(0);
     }
 
     .main{
         width:100%;
         margin-left:0;
+        margin-right:0;
         padding:14px;
     }
 
+    .rtl .main{
+        margin-left:0;
+        margin-right:0;
+    }
+
     .mobile-menu{
-        display:block;
+        display:flex;
+        align-items:center;
+        justify-content:center;
     }
 
     .topbar{
@@ -808,6 +940,11 @@ button{
         padding-bottom:20px;
     }
 
+    .brand-logo{
+        width:40px;
+        height:40px;
+    }
+
     .stats{
         grid-template-columns:1fr 1fr;
     }
@@ -860,8 +997,13 @@ button{
     .config-actions .btn{
         flex:1;
     }
-}
 
+    .language-btn{
+        min-width:58px;
+        padding:0 8px;
+        font-size:9px;
+    }
+}
 </style>
 </head>
 
@@ -869,65 +1011,92 @@ button{
 
 <div class="app">
 
-<!-- ================= SIDEBAR ================= -->
-
 <aside class="sidebar" id="sidebar">
 
     <div>
 
         <div class="brand">
 
+            <img
+                src="/static/pablo-logo.png"
+                alt="PabloPanel"
+                class="brand-logo"
+            >
+
             <div>
                 <div class="brand-name">PabloPanel</div>
-                <div class="brand-sub">VPN CONTROL PANEL</div>
+                <div class="brand-sub" data-i18n="vpnControlPanel">
+                    VPN CONTROL PANEL
+                </div>
             </div>
 
         </div>
 
-        <div class="nav-title">MAIN MENU</div>
+        <!-- فقط سه خط -->
+        <div
+            class="nav-title"
+            style="
+                font-size:18px;
+                letter-spacing:0;
+                padding:0 10px 10px;
+                color:#00bfff;
+            "
+        >
+            ☰
+        </div>
 
         <a href="/dashboard" class="nav-item active">
             <span class="nav-icon">⌂</span>
-            Dashboard
+            <span data-i18n="dashboard">Dashboard</span>
         </a>
 
+        <!-- Users بدون ایموجی -->
         <a href="#users" class="nav-item" onclick="closeSidebar()">
-            <span class="nav-icon">♙</span>
-            Users
+            <span data-i18n="users">Users</span>
         </a>
 
-        <a href="#create"
-           class="nav-item"
-           onclick="openModal('addModal');closeSidebar();return false;">
+        <a
+            href="#create"
+            class="nav-item"
+            onclick="
+                openModal('addModal');
+                closeSidebar();
+                return false;
+            "
+        >
             <span class="nav-icon">＋</span>
-            Create User
+            <span data-i18n="createUser">Create User</span>
         </a>
 
         <a href="/settings" class="nav-item">
             <span class="nav-icon">⚙</span>
-            Panel Settings
+            <span data-i18n="panelSettings">Panel Settings</span>
         </a>
 
-        <div class="nav-title" style="margin-top:18px;">
+        <div
+            class="nav-title"
+            style="margin-top:18px;"
+            data-i18n="community"
+        >
             COMMUNITY
         </div>
 
-        <a href="https://t.me/pablo_artor"
-           target="_blank"
-           class="nav-item">
-
-            <span class="nav-icon">✈</span>
-            Join Telegram
-
+        <a
+            href="https://t.me/pablo_artor"
+            target="_blank"
+            class="nav-item"
+        >
+            <span class="nav-icon">➤</span>
+            <span data-i18n="joinTelegram">Join Telegram</span>
         </a>
 
-        <a href="https://t.me/pablo_artor"
-           target="_blank"
-           class="nav-item">
-
-            <span class="nav-icon">♥</span>
-            Support Developer
-
+        <a
+            href="https://t.me/pablo_artor"
+            target="_blank"
+            class="nav-item"
+        >
+            <span class="nav-icon">◇</span>
+            <span data-i18n="supportDeveloper">Support Developer</span>
         </a>
 
     </div>
@@ -935,26 +1104,21 @@ button{
     <div class="sidebar-bottom">
 
         <div class="developer-box">
-
-            <small>DESIGNED & DEVELOPED BY</small>
+            <small data-i18n="designedDeveloped">
+                DESIGNED & DEVELOPED BY
+            </small>
 
             <strong>PabloPanel</strong>
-
         </div>
 
-        <a href="/logout"
-           class="nav-item logout">
-
+        <a href="/logout" class="nav-item logout">
             <span class="nav-icon">↪</span>
-            Logout
-
+            <span data-i18n="logout">Logout</span>
         </a>
 
     </div>
 
 </aside>
-
-<!-- ================= MAIN ================= -->
 
 <main class="main">
 
@@ -964,15 +1128,17 @@ button{
 
             <button
                 class="mobile-menu"
-                onclick="toggleSidebar()">
-                ☰
-            </button>
+                onclick="toggleSidebar()"
+                aria-label="Open navigation"
+            >☰</button>
 
             <div class="page-title">
 
-                <h1>Dashboard</h1>
+                <h1 data-i18n="dashboard">
+                    Dashboard
+                </h1>
 
-                <p>
+                <p data-i18n="welcome">
                     Welcome back to PabloPanel Control Panel
                 </p>
 
@@ -980,25 +1146,45 @@ button{
 
         </div>
 
-        <div class="profile">
+        <div class="top-actions">
 
-            <div class="profile-info">
+            <!-- Language -->
+            <button
+                class="language-btn"
+                id="languageBtn"
+                onclick="toggleLanguage()"
+            >
+                فارسی
+            </button>
 
-                <strong>Administrator</strong>
+            <div class="profile">
 
-                <span>● Online</span>
+                <div class="profile-info">
 
-            </div>
+                    <strong data-i18n="administrator">
+                        Administrator
+                    </strong>
 
-            <div class="avatar">
-                ♙
+                    <span data-i18n="online">
+                        ONLINE
+                    </span>
+
+                </div>
+
+                <div class="avatar">
+
+                    <img
+                        src="/static/pablo-logo.png"
+                        alt="Administrator"
+                    >
+
+                </div>
+
             </div>
 
         </div>
 
     </div>
-
-    <!-- ================= STATS ================= -->
 
     <section class="stats">
 
@@ -1006,12 +1192,15 @@ button{
 
             <div class="stat-top">
 
-                <span class="stat-label">
+                <span
+                    class="stat-label"
+                    data-i18n="totalUsers"
+                >
                     TOTAL USERS
                 </span>
 
                 <span class="stat-icon">
-                    ♙
+                    USERS
                 </span>
 
             </div>
@@ -1020,8 +1209,11 @@ button{
                 {{ total_users }}
             </div>
 
-            <div class="stat-change">
-                ↑ All accounts
+            <div
+                class="stat-change"
+                data-i18n="allAccounts"
+            >
+                ALL ACCOUNTS
             </div>
 
         </div>
@@ -1030,12 +1222,15 @@ button{
 
             <div class="stat-top">
 
-                <span class="stat-label">
+                <span
+                    class="stat-label"
+                    data-i18n="activeUsers"
+                >
                     ACTIVE USERS
                 </span>
 
                 <span class="stat-icon">
-                    ⚡
+                    LIVE
                 </span>
 
             </div>
@@ -1044,8 +1239,11 @@ button{
                 {{ active_users }}
             </div>
 
-            <div class="stat-change">
-                ↑ Currently active
+            <div
+                class="stat-change"
+                data-i18n="currentlyActive"
+            >
+                CURRENTLY ACTIVE
             </div>
 
         </div>
@@ -1054,12 +1252,15 @@ button{
 
             <div class="stat-top">
 
-                <span class="stat-label">
+                <span
+                    class="stat-label"
+                    data-i18n="totalTraffic"
+                >
                     TOTAL TRAFFIC
                 </span>
 
                 <span class="stat-icon">
-                    ☁
+                    DATA
                 </span>
 
             </div>
@@ -1074,8 +1275,11 @@ button{
 
             </div>
 
-            <div class="stat-change">
-                Available quota
+            <div
+                class="stat-change"
+                data-i18n="availableQuota"
+            >
+                AVAILABLE QUOTA
             </div>
 
         </div>
@@ -1084,12 +1288,15 @@ button{
 
             <div class="stat-top">
 
-                <span class="stat-label">
+                <span
+                    class="stat-label"
+                    data-i18n="usedTraffic"
+                >
                     USED TRAFFIC
                 </span>
 
                 <span class="stat-icon">
-                    ◈
+                    USED
                 </span>
 
             </div>
@@ -1104,15 +1311,16 @@ button{
 
             </div>
 
-            <div class="stat-change">
-                Total consumption
+            <div
+                class="stat-change"
+                data-i18n="totalConsumption"
+            >
+                TOTAL CONSUMPTION
             </div>
 
         </div>
 
     </section>
-
-    <!-- ================= SERVER + TRAFFIC ================= -->
 
     <section class="grid">
 
@@ -1120,7 +1328,9 @@ button{
 
             <div class="section-title">
 
-                <h2>Server Status</h2>
+                <h2 data-i18n="serverStatus">
+                    Server Status
+                </h2>
 
                 <span>PabloPanel</span>
 
@@ -1132,11 +1342,11 @@ button{
 
                 <div class="status-text">
 
-                    <strong>
+                    <strong data-i18n="serverOnline">
                         Server Online
                     </strong>
 
-                    <span>
+                    <span data-i18n="xrayRunning">
                         Xray Core is running normally
                     </span>
 
@@ -1147,33 +1357,18 @@ button{
             <div class="server-info">
 
                 <div class="info-box">
-
                     <span>CORE</span>
-
-                    <strong>
-                        Xray
-                    </strong>
-
+                    <strong>Xray</strong>
                 </div>
 
                 <div class="info-box">
-
                     <span>PROTOCOL</span>
-
-                    <strong>
-                        VLESS
-                    </strong>
-
+                    <strong>VLESS</strong>
                 </div>
 
                 <div class="info-box">
-
                     <span>NETWORK</span>
-
-                    <strong>
-                        WebSocket
-                    </strong>
-
+                    <strong>WebSocket</strong>
                 </div>
 
             </div>
@@ -1184,12 +1379,13 @@ button{
 
             <div class="section-title">
 
-                <h2>
+                <h2 data-i18n="trafficOverview">
                     Traffic Overview
                 </h2>
 
                 <span>
-                    {{ total_used }} GB USED
+                    {{ total_used }} GB
+                    <span data-i18n="usedText">USED</span>
                 </span>
 
             </div>
@@ -1217,32 +1413,30 @@ button{
 
     </section>
 
-    <!-- ================= USERS ================= -->
-
     <section class="card users-card" id="users">
 
         <div class="section-title">
 
             <div>
 
-                <h2>
+                <h2 data-i18n="usersManagement">
                     Users Management
                 </h2>
 
-                <span style="display:block;margin-top:5px;">
-
+                <span
+                    style="display:block;margin-top:5px;"
+                    data-i18n="manageAccounts"
+                >
                     Manage your VPN accounts and configurations
-
                 </span>
 
             </div>
 
             <button
                 class="btn btn-blue"
-                onclick="openModal('addModal')">
-
-                ＋ Create User
-
+                onclick="openModal('addModal')"
+            >
+                + <span data-i18n="createUser">Create User</span>
             </button>
 
         </div>
@@ -1272,7 +1466,7 @@ button{
                 <div class="user-name">
 
                     <div class="user-avatar">
-                        ♙
+                        US
                     </div>
 
                     <div>
@@ -1291,40 +1485,49 @@ button{
 
                 <div class="user-data">
 
-                    <b>
-                        {{ used_gb }} GB
-                    </b>
+                    <b>{{ used_gb }} GB</b>
 
                     <br>
 
-                    Used
+                    <span data-i18n="used">Used</span>
 
                 </div>
 
                 <div class="user-data">
 
-                    <b>
-                        {{ user.quota_gb }} GB
-                    </b>
+                    <b>{{ user.quota_gb }} GB</b>
 
                     <br>
 
-                    Quota
+                    <span data-i18n="quota">Quota</span>
 
                 </div>
 
-                <div style="display:flex;align-items:center;gap:8px;justify-content:flex-end;">
+                <div
+                    style="
+                        display:flex;
+                        align-items:center;
+                        gap:8px;
+                        justify-content:flex-end;
+                    "
+                >
 
                     {% if user.enabled == 1 %}
 
-                    <span class="badge active">
-                        ● Active
+                    <span
+                        class="badge active"
+                        data-i18n="active"
+                    >
+                        ACTIVE
                     </span>
 
                     {% else %}
 
-                    <span class="badge off">
-                        ● Disabled
+                    <span
+                        class="badge off"
+                        data-i18n="disabled"
+                    >
+                        DISABLED
                     </span>
 
                     {% endif %}
@@ -1333,30 +1536,33 @@ button{
 
                         <button
                             class="btn btn-blue"
-                            onclick="loadUserConfig({{ user.id }})">
-
-                            Config
-
+                            onclick="loadUserConfig({{ user.id }})"
+                        >
+                            <span data-i18n="config">Config</span>
                         </button>
 
                         <button
                             class="btn btn-dark"
-                            onclick="toggleUser({{ user.id }})">
+                            onclick="toggleUser({{ user.id }})"
+                        >
 
                             {% if user.enabled == 1 %}
-                            Off
+
+                                <span data-i18n="off">Off</span>
+
                             {% else %}
-                            On
+
+                                <span data-i18n="on">On</span>
+
                             {% endif %}
 
                         </button>
 
                         <button
                             class="btn btn-red"
-                            onclick="deleteUser({{ user.id }})">
-
-                            ✕
-
+                            onclick="deleteUser({{ user.id }})"
+                        >
+                            <span data-i18n="delete">Delete</span>
                         </button>
 
                     </div>
@@ -1369,13 +1575,25 @@ button{
 
         {% else %}
 
-            <div style="padding:50px 10px;text-align:center;color:#557089;">
+            <div
+                style="
+                    padding:50px 10px;
+                    text-align:center;
+                    color:#557089;
+                "
+            >
 
-                <div style="font-size:35px;margin-bottom:10px;">
-                    ♙
+                <div
+                    style="font-size:12px;margin-bottom:10px;"
+                    data-i18n="noUsers"
+                >
+                    NO USERS
                 </div>
 
-                <div style="font-size:12px;">
+                <div
+                    style="font-size:12px;"
+                    data-i18n="noUsersCreated"
+                >
                     No users created yet
                 </div>
 
@@ -1391,7 +1609,7 @@ button{
 
 </div>
 
-<!-- ================= ADD USER MODAL ================= -->
+<!-- ADD USER -->
 
 <div class="overlay" id="addModal">
 
@@ -1399,25 +1617,25 @@ button{
 
         <div class="modal-head">
 
-            <h3>
-                ＋ Create New User
+            <h3 data-i18n="createNewUser">
+                Create New User
             </h3>
 
             <button
                 class="close"
-                onclick="closeModal('addModal')">
-                ×
-            </button>
+                onclick="closeModal('addModal')"
+            >×</button>
 
         </div>
 
         <form
             id="addUserForm"
-            onsubmit="submitAddUser(event)">
+            onsubmit="submitAddUser(event)"
+        >
 
             <div class="form-group">
 
-                <label>
+                <label data-i18n="username">
                     USERNAME
                 </label>
 
@@ -1426,15 +1644,22 @@ button{
                     class="input"
                     type="text"
                     placeholder="example: user01"
-                    required>
+                    required
+                >
 
             </div>
 
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div
+                style="
+                    display:grid;
+                    grid-template-columns:1fr 1fr;
+                    gap:10px;
+                "
+            >
 
                 <div class="form-group">
 
-                    <label>
+                    <label data-i18n="trafficQuota">
                         TRAFFIC QUOTA (GB)
                     </label>
 
@@ -1444,13 +1669,14 @@ button{
                         type="number"
                         value="30"
                         min="1"
-                        required>
+                        required
+                    >
 
                 </div>
 
                 <div class="form-group">
 
-                    <label>
+                    <label data-i18n="validity">
                         VALIDITY (DAYS)
                     </label>
 
@@ -1460,7 +1686,8 @@ button{
                         type="number"
                         value="30"
                         min="1"
-                        required>
+                        required
+                    >
 
                 </div>
 
@@ -1470,10 +1697,10 @@ button{
                 type="submit"
                 id="addBtnSubmit"
                 class="btn btn-blue"
-                style="width:100%;padding:13px;">
-
+                style="width:100%;padding:13px;"
+                data-i18n="createVpnAccount"
+            >
                 Create VPN Account
-
             </button>
 
         </form>
@@ -1482,7 +1709,7 @@ button{
 
 </div>
 
-<!-- ================= CONFIG MODAL ================= -->
+<!-- CONFIG -->
 
 <div class="overlay" id="configModal">
 
@@ -1491,20 +1718,19 @@ button{
         <div class="modal-head">
 
             <h3 id="cfgTitle">
-                ⚡ User Configurations
+                User Configurations
             </h3>
 
             <button
                 class="close"
-                onclick="closeModal('configModal')">
-                ×
-            </button>
+                onclick="closeModal('configModal')"
+            >×</button>
 
         </div>
 
         <div class="sub-box">
 
-            <label>
+            <label data-i18n="subscriptionUrl">
                 SUBSCRIPTION URL
             </label>
 
@@ -1513,34 +1739,42 @@ button{
                 <input
                     id="subUrlField"
                     class="input"
-                    readonly>
+                    readonly
+                >
 
                 <button
                     onclick="copySubLink()"
-                    class="btn btn-blue">
-
+                    class="btn btn-blue"
+                    data-i18n="copy"
+                >
                     Copy
-
                 </button>
 
             </div>
 
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:7px;">
+            <div
+                style="
+                    display:grid;
+                    grid-template-columns:1fr 1fr;
+                    gap:6px;
+                    margin-top:7px;
+                "
+            >
 
                 <button
                     onclick="openSubLink()"
-                    class="btn btn-dark">
-
+                    class="btn btn-dark"
+                    data-i18n="openWebPanel"
+                >
                     Open Web Panel
-
                 </button>
 
                 <button
                     onclick="copyAllConfigs()"
-                    class="btn btn-green">
-
+                    class="btn btn-green"
+                    data-i18n="copyAll"
+                >
                     Copy All
-
                 </button>
 
             </div>
@@ -1551,34 +1785,46 @@ button{
 
         <div
             id="qrWrap"
-            style="display:none;text-align:center;margin-top:12px;">
+            style="
+                display:none;
+                text-align:center;
+                margin-top:12px;
+            "
+        >
 
             <div
                 id="qrBox"
-                style="display:inline-block;background:#fff;padding:9px;border-radius:12px;">
-            </div>
+                style="
+                    display:inline-block;
+                    background:#fff;
+                    padding:9px;
+                    border-radius:12px;
+                "
+            ></div>
 
             <div
                 id="qrText"
-                style="color:#7190a9;font-size:9px;margin-top:7px;">
-            </div>
+                style="
+                    color:#7190a9;
+                    font-size:9px;
+                    margin-top:7px;
+                "
+            ></div>
 
         </div>
 
         <button
             onclick="closeModal('configModal')"
             class="btn btn-dark"
-            style="width:100%;margin-top:12px;">
-
+            style="width:100%;margin-top:12px;"
+            data-i18n="close"
+        >
             Close
-
         </button>
 
     </div>
 
 </div>
-
-<!-- ================= TOAST ================= -->
 
 <div id="toast" class="toast">
     System message
@@ -1588,6 +1834,174 @@ button{
 
 let currentConfigs = [];
 let currentSub = '';
+
+/* LANGUAGE */
+
+const translations = {
+
+    en:{
+        vpnControlPanel:"VPN CONTROL PANEL",
+        dashboard:"Dashboard",
+        users:"Users",
+        createUser:"Create User",
+        panelSettings:"Panel Settings",
+        community:"COMMUNITY",
+        joinTelegram:"Join Telegram",
+        supportDeveloper:"Support Developer",
+        designedDeveloped:"DESIGNED & DEVELOPED BY",
+        logout:"Logout",
+        welcome:"Welcome back to PabloPanel Control Panel",
+        administrator:"Administrator",
+        online:"ONLINE",
+        totalUsers:"TOTAL USERS",
+        allAccounts:"ALL ACCOUNTS",
+        activeUsers:"ACTIVE USERS",
+        currentlyActive:"CURRENTLY ACTIVE",
+        totalTraffic:"TOTAL TRAFFIC",
+        availableQuota:"AVAILABLE QUOTA",
+        usedTraffic:"USED TRAFFIC",
+        totalConsumption:"TOTAL CONSUMPTION",
+        serverStatus:"Server Status",
+        serverOnline:"Server Online",
+        xrayRunning:"Xray Core is running normally",
+        trafficOverview:"Traffic Overview",
+        usedText:"USED",
+        usersManagement:"Users Management",
+        manageAccounts:"Manage your VPN accounts and configurations",
+        used:"Used",
+        quota:"Quota",
+        active:"ACTIVE",
+        disabled:"DISABLED",
+        config:"Config",
+        off:"Off",
+        on:"On",
+        delete:"Delete",
+        noUsers:"NO USERS",
+        noUsersCreated:"No users created yet",
+        createNewUser:"Create New User",
+        username:"USERNAME",
+        trafficQuota:"TRAFFIC QUOTA (GB)",
+        validity:"VALIDITY (DAYS)",
+        createVpnAccount:"Create VPN Account",
+        subscriptionUrl:"SUBSCRIPTION URL",
+        copy:"Copy",
+        openWebPanel:"Open Web Panel",
+        copyAll:"Copy All",
+        close:"Close"
+    },
+
+    fa:{
+        vpnControlPanel:"پنل مدیریت VPN",
+        dashboard:"داشبورد",
+        users:"کاربران",
+        createUser:"ساخت کاربر",
+        panelSettings:"تنظیمات پنل",
+        community:"ارتباطات",
+        joinTelegram:"عضویت در تلگرام",
+        supportDeveloper:"پشتیبانی سازنده",
+        designedDeveloped:"طراحی و توسعه توسط",
+        logout:"خروج",
+        welcome:"به پنل مدیریت PabloPanel خوش آمدید",
+        administrator:"مدیر",
+        online:"آنلاین",
+        totalUsers:"کل کاربران",
+        allAccounts:"تمام حساب‌ها",
+        activeUsers:"کاربران فعال",
+        currentlyActive:"در حال حاضر فعال",
+        totalTraffic:"کل ترافیک",
+        availableQuota:"حجم قابل استفاده",
+        usedTraffic:"ترافیک مصرف‌شده",
+        totalConsumption:"مجموع مصرف",
+        serverStatus:"وضعیت سرور",
+        serverOnline:"سرور آنلاین است",
+        xrayRunning:"هسته Xray به‌صورت عادی در حال اجراست",
+        trafficOverview:"نمای کلی ترافیک",
+        usedText:"مصرف‌شده",
+        usersManagement:"مدیریت کاربران",
+        manageAccounts:"مدیریت حساب‌ها و کانفیگ‌های VPN",
+        used:"مصرف",
+        quota:"حجم",
+        active:"فعال",
+        disabled:"غیرفعال",
+        config:"کانفیگ",
+        off:"خاموش",
+        on:"روشن",
+        delete:"حذف",
+        noUsers:"کاربری وجود ندارد",
+        noUsersCreated:"هنوز کاربری ساخته نشده است",
+        createNewUser:"ساخت کاربر جدید",
+        username:"نام کاربری",
+        trafficQuota:"حجم ترافیک (GB)",
+        validity:"اعتبار (روز)",
+        createVpnAccount:"ساخت حساب VPN",
+        subscriptionUrl:"لینک اشتراک",
+        copy:"کپی",
+        openWebPanel:"باز کردن پنل وب",
+        copyAll:"کپی همه",
+        close:"بستن"
+    }
+
+};
+
+let currentLanguage =
+    localStorage.getItem('pabloPanelLanguage') || 'en';
+
+function applyLanguage(){
+
+    const lang =
+        translations[currentLanguage];
+
+    document.documentElement.lang =
+        currentLanguage;
+
+    document.documentElement.dir =
+        currentLanguage === 'fa'
+            ? 'rtl'
+            : 'ltr';
+
+    document.body.classList.toggle(
+        'rtl',
+        currentLanguage === 'fa'
+    );
+
+    document
+        .querySelectorAll('[data-i18n]')
+        .forEach(element=>{
+
+            const key =
+                element.getAttribute('data-i18n');
+
+            if(lang[key]){
+                element.textContent =
+                    lang[key];
+            }
+
+        });
+
+    document.getElementById('languageBtn').innerText =
+        currentLanguage === 'en'
+            ? 'فارسی'
+            : 'English';
+
+}
+
+function toggleLanguage(){
+
+    currentLanguage =
+        currentLanguage === 'en'
+            ? 'fa'
+            : 'en';
+
+    localStorage.setItem(
+        'pabloPanelLanguage',
+        currentLanguage
+    );
+
+    applyLanguage();
+
+}
+
+/* TOAST */
 
 function showToast(message){
 
@@ -1599,18 +2013,19 @@ function showToast(message){
     toast.classList.add('show');
 
     setTimeout(()=>{
-
         toast.classList.remove('show');
-
     },2200);
 
 }
+
+/* SIDEBAR */
 
 function toggleSidebar(){
 
     document
         .getElementById('sidebar')
-        .classList.toggle('open');
+        .classList
+        .toggle('open');
 
 }
 
@@ -1618,15 +2033,19 @@ function closeSidebar(){
 
     document
         .getElementById('sidebar')
-        .classList.remove('open');
+        .classList
+        .remove('open');
 
 }
+
+/* MODALS */
 
 function openModal(id){
 
     document
         .getElementById(id)
-        .classList.add('show');
+        .classList
+        .add('show');
 
 }
 
@@ -1634,9 +2053,12 @@ function closeModal(id){
 
     document
         .getElementById(id)
-        .classList.remove('show');
+        .classList
+        .remove('show');
 
 }
+
+/* ADD USER */
 
 async function submitAddUser(event){
 
@@ -1663,7 +2085,9 @@ async function submitAddUser(event){
         .getElementById('addBtnSubmit');
 
     button.innerText =
-        'Creating...';
+        currentLanguage === 'fa'
+            ? 'در حال ساخت...'
+            : 'Creating...';
 
     button.disabled = true;
 
@@ -1674,12 +2098,9 @@ async function submitAddUser(event){
                 '/api/add_user',
                 {
                     method:'POST',
-
                     headers:{
-                        'Content-Type':
-                            'application/json'
+                        'Content-Type':'application/json'
                     },
-
                     body:JSON.stringify({
                         name,
                         quota,
@@ -1694,13 +2115,13 @@ async function submitAddUser(event){
         if(data.status === 'success'){
 
             showToast(
-                'VPN account created successfully'
+                currentLanguage === 'fa'
+                    ? 'حساب VPN با موفقیت ساخته شد'
+                    : 'VPN account created successfully'
             );
 
             setTimeout(()=>{
-
                 location.reload();
-
             },600);
 
         }else{
@@ -1710,8 +2131,7 @@ async function submitAddUser(event){
                 'Failed to create user'
             );
 
-            button.innerText =
-                'Create VPN Account';
+            applyLanguage();
 
             button.disabled = false;
 
@@ -1720,17 +2140,20 @@ async function submitAddUser(event){
     }catch(error){
 
         alert(
-            'Server connection error'
+            currentLanguage === 'fa'
+                ? 'خطا در اتصال به سرور'
+                : 'Server connection error'
         );
 
-        button.innerText =
-            'Create VPN Account';
+        applyLanguage();
 
         button.disabled = false;
 
     }
 
 }
+
+/* TOGGLE USER */
 
 async function toggleUser(id){
 
@@ -1756,21 +2179,25 @@ async function toggleUser(id){
     }catch(error){
 
         alert(
-            'Failed to change user status'
+            currentLanguage === 'fa'
+                ? 'تغییر وضعیت کاربر انجام نشد'
+                : 'Failed to change user status'
         );
 
     }
 
 }
 
+/* DELETE USER */
+
 async function deleteUser(id){
 
     if(!confirm(
-        'Are you sure you want to delete this user?'
+        currentLanguage === 'fa'
+            ? 'آیا مطمئن هستید که می‌خواهید این کاربر را حذف کنید؟'
+            : 'Are you sure you want to delete this user?'
     )){
-
         return;
-
     }
 
     try{
@@ -1789,13 +2216,13 @@ async function deleteUser(id){
         if(data.status === 'success'){
 
             showToast(
-                'User deleted successfully'
+                currentLanguage === 'fa'
+                    ? 'کاربر با موفقیت حذف شد'
+                    : 'User deleted successfully'
             );
 
             setTimeout(()=>{
-
                 location.reload();
-
             },600);
 
         }
@@ -1803,17 +2230,23 @@ async function deleteUser(id){
     }catch(error){
 
         alert(
-            'Failed to delete user'
+            currentLanguage === 'fa'
+                ? 'حذف کاربر انجام نشد'
+                : 'Failed to delete user'
         );
 
     }
 
 }
 
+/* LOAD CONFIG */
+
 async function loadUserConfig(id){
 
     showToast(
-        'Loading configurations...'
+        currentLanguage === 'fa'
+            ? 'در حال دریافت کانفیگ‌ها...'
+            : 'Loading configurations...'
     );
 
     try{
@@ -1846,7 +2279,11 @@ async function loadUserConfig(id){
         document
             .getElementById('cfgTitle')
             .innerText =
-            '⚡ Configurations · ' +
+            (
+                currentLanguage === 'fa'
+                    ? 'کانفیگ‌های کاربر · '
+                    : 'Configurations · '
+            ) +
             data.user.name;
 
         document
@@ -1855,8 +2292,9 @@ async function loadUserConfig(id){
             data.sub;
 
         const container =
-            document
-            .getElementById('cfgContainer');
+            document.getElementById(
+                'cfgContainer'
+            );
 
         container.innerHTML = '';
 
@@ -1890,19 +2328,17 @@ async function loadUserConfig(id){
                             <button
                                 class="btn btn-blue"
                                 data-index="${index}"
-                                onclick="copyConfigByIndex(this)">
-
-                                Copy
-
+                                onclick="copyConfigByIndex(this)"
+                            >
+                                ${currentLanguage === 'fa' ? 'کپی' : 'Copy'}
                             </button>
 
                             <button
                                 class="btn btn-dark"
                                 data-index="${index}"
-                                onclick="qrConfigByIndex(this)">
-
+                                onclick="qrConfigByIndex(this)"
+                            >
                                 QR
-
                             </button>
 
                         </div>
@@ -1918,17 +2354,16 @@ async function loadUserConfig(id){
 
         document
             .getElementById('qrWrap')
-            .style.display =
-            'none';
+            .style.display = 'none';
 
-        openModal(
-            'configModal'
-        );
+        openModal('configModal');
 
     }catch(error){
 
         alert(
-            'Failed to load configurations'
+            currentLanguage === 'fa'
+                ? 'دریافت کانفیگ‌ها انجام نشد'
+                : 'Failed to load configurations'
         );
 
     }
@@ -1949,9 +2384,7 @@ function escapeHtml(value){
 function copyConfigByIndex(button){
 
     const index =
-        Number(
-            button.dataset.index
-        );
+        Number(button.dataset.index);
 
     copyText(
         currentConfigs[index].config
@@ -1962,9 +2395,7 @@ function copyConfigByIndex(button){
 function qrConfigByIndex(button){
 
     const index =
-        Number(
-            button.dataset.index
-        );
+        Number(button.dataset.index);
 
     showQR(
         currentConfigs[index].config,
@@ -1980,7 +2411,9 @@ function copySubLink(){
         .then(()=>{
 
             showToast(
-                'Subscription URL copied'
+                currentLanguage === 'fa'
+                    ? 'لینک اشتراک کپی شد'
+                    : 'Subscription URL copied'
             );
 
         });
@@ -2000,9 +2433,7 @@ function copyAllConfigs(){
 
     const all =
         currentConfigs
-        .map(
-            item=>item.config
-        )
+        .map(item=>item.config)
         .join('\n');
 
     navigator.clipboard
@@ -2010,7 +2441,9 @@ function copyAllConfigs(){
         .then(()=>{
 
             showToast(
-                'All configurations copied'
+                currentLanguage === 'fa'
+                    ? 'تمام کانفیگ‌ها کپی شدند'
+                    : 'All configurations copied'
             );
 
         });
@@ -2024,7 +2457,9 @@ function copyText(text){
         .then(()=>{
 
             showToast(
-                'Configuration copied'
+                currentLanguage === 'fa'
+                    ? 'کانفیگ کپی شد'
+                    : 'Configuration copied'
             );
 
         });
@@ -2034,14 +2469,10 @@ function copyText(text){
 function showQR(config,title){
 
     const wrap =
-        document.getElementById(
-            'qrWrap'
-        );
+        document.getElementById('qrWrap');
 
     const box =
-        document.getElementById(
-            'qrBox'
-        );
+        document.getElementById('qrBox');
 
     box.innerHTML = '';
 
@@ -2056,13 +2487,13 @@ function showQR(config,title){
 
     document
         .getElementById('qrText')
-        .innerText =
-        title;
+        .innerText = title;
 
-    wrap.style.display =
-        'block';
+    wrap.style.display = 'block';
 
 }
+
+/* CLOSE MODAL ON BACKGROUND */
 
 document
     .querySelectorAll('.overlay')
@@ -2072,9 +2503,7 @@ document
             'click',
             function(event){
 
-                if(
-                    event.target === overlay
-                ){
+                if(event.target === overlay){
 
                     overlay
                         .classList
@@ -2086,6 +2515,10 @@ document
         );
 
     });
+
+/* START LANGUAGE */
+
+applyLanguage();
 
 </script>
 
