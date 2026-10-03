@@ -1,197 +1,288 @@
-<div align="center">⚡ PabloPanel
+# ✦ P A B L O · P A N E L ✦
 
-DARK NEON VPN PANEL • SUBSCRIPTIONS
+<p align="center">
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:05001A,45:101B4D,75:312E81,100:00BFFF&height=190&section=header&text=%E2%9C%A6%20P%20A%20B%20L%20O%20%C2%B7%20P%20A%20N%20E%20L%20%E2%9C%A6&fontColor=FFFFFF&fontSize=38&fontAlignY=42&animation=twinkling" width="100%"/>
+</p>
 
-"VPN"　"SUBSCRIPTION"　"RAILWAY"
+<p align="center">
+  <strong>پنل مدرن و حرفه‌ای برای مدیریت سرویس‌ها، کاربران، کانفیگ‌ها و اشتراک‌ها</strong>
+</p>
 
-یک پنل مدرن و حرفه‌ای برای مدیریت کاربران، کانفیگ‌ها و اشتراک‌ها
-
-</div>---
-
-💡 Tip
-
-Fork → Deploy on Railway → Port "8080" → Open PabloPanel
-
-چند مرحله ساده و آماده برای اجرا 🚀
-
----
-
-✨ ویژگی‌ها
-
-<table>
-<tr>
-<td width="50%">👥 مدیریت کاربران
-
-ساخت، فعال/غیرفعال کردن و حذف کاربران از داخل داشبورد.
-
-</td>
-<td width="50%">📊 آمار زنده
-
-نمایش وضعیت کاربران، ترافیک مصرف‌شده و اطلاعات سرور.
-
-</td>
-</tr><tr>
-<td width="50%">🔗 Subscription
-
-صفحه اختصاصی برای هر کاربر با اطلاعات واقعی اشتراک و کانفیگ‌ها.
-
-</td>
-<td width="50%">📋 مدیریت کانفیگ
-
-مشاهده، کپی و دریافت QR Code برای کانفیگ‌های کاربر.
-
-</td>
-</tr><tr>
-<td width="50%">📱 Responsive
-
-طراحی شده برای موبایل، تبلت و دسکتاپ.
-
-</td>
-<td width="50%">⚡ رابط کاربری مدرن
-
-طراحی Dark Neon با تمرکز روی سرعت، سادگی و تجربه کاربری.
-
-</td>
-</tr>
-</table>---
-
-🚀 نصب و راه‌اندازی
-
-1️⃣ Fork روی GitHub
-
-ابتدا این ریپازیتوری را Fork کنید تا یک نسخه از PabloPanel در حساب GitHub شما ساخته شود.
+<p align="center">
+  <a href="https://railway.app/">
+    <img src="https://capsule-render.vercel.app/api?type=rect&color=0:05001A,45:172554,75:312E81,100:00BFFF&height=55&text=%E2%9C%A6%20DEPLOY%20ON%20RAILWAY%20%E2%9C%A6&fontColor=FFFFFF&fontSize=18&fontAlignY=52&animation=twinkling" />
+  </a>
+  &nbsp;
+  <a href="https://github.com/hdzirxluci-hub/pablo-panel">
+    <img src="https://capsule-render.vercel.app/api?type=rect&color=0:05001A,45:172554,75:4C1D95,100:7C3AED&height=55&text=%E2%9C%A6%20VIEW%20ON%20GITHUB%20%E2%9C%A6&fontColor=FFFFFF&fontSize=18&fontAlignY=52&animation=twinkling" />
+  </a>
+</p>
 
 ---
 
-2️⃣ Deploy روی Railway
+## ✦ درباره Pablo Panel
 
-1. وارد Railway شوید.
-2. گزینه New Project را انتخاب کنید.
-3. گزینه Deploy from GitHub Repo را بزنید.
-4. ریپازیتوری PabloPanel را انتخاب کنید.
-5. منتظر بمانید تا پروژه Deploy شود.
+**Pablo Panel** یک پنل مدرن برای مدیریت سرویس‌ها و اطلاعات کاربران است که با تمرکز روی ظاهر حرفه‌ای، استفاده راحت در موبایل و نمایش مرتب اطلاعات طراحی شده است.
 
----
+پنل می‌تواند اطلاعات سرویس‌ها، کاربران، حجم مصرفی، تاریخ انقضا، کانفیگ‌ها و لینک اشتراک را در یک رابط کاربری جمع‌وجور و مدرن نمایش دهد.
 
-3️⃣ تنظیم Port
-
-پنل روی پورت زیر اجرا می‌شود:
-
-8080
-
-در Railway از قسمت:
-
-Settings → Networking → Generate Domain
-
-دامنه عمومی پروژه را ایجاد کنید.
+هدف پروژه این است که مدیریت سرویس برای کاربر نهایی ساده باشد و در عین حال ظاهر پنل حس یک داشبورد حرفه‌ای و مدرن را منتقل کند.
 
 ---
 
-«⚠️ نکته مهم
+## ✦ ظاهر و تجربه کاربری
 
-فقط پورت 8080 مربوط به پنل است.
+رابط کاربری Pablo Panel بر پایه یک ظاهر تاریک و مدرن طراحی شده است.
 
-بعد از ساخت Domain، آدرس ایجادشده را برای ورود به PabloPanel استفاده کنید.»
+• پس‌زمینه تیره و فضایی  
+• ترکیب آبی، Cyan و Purple  
+• کارت‌های شیشه‌ای و نیمه‌شفاف  
+• افکت‌های Glow و نورپردازی نرم  
+• ستاره‌ها و پس‌زمینه متحرک  
+• انیمیشن‌های سبک و روان  
+• طراحی Mobile First  
+• سازگار با صفحه‌های کوچک موبایل  
+• بدون اسکرول افقی و بیرون‌زدگی محتوا  
+• دکمه‌های Copy برای اطلاعات مهم  
+• نمایش مرتب اطلاعات سرویس  
 
----
+نمای کلی رابط:
 
-👤 مدیریت کاربران
-
-از داخل Dashboard می‌توانید:
-
-- ➕ کاربر جدید ایجاد کنید
-- 🟢 کاربر را فعال کنید
-- 🔴 کاربر را غیرفعال کنید
-- 🗑️ کاربر را حذف کنید
-- 📊 مصرف ترافیک را مشاهده کنید
-- 🔗 لینک Subscription را دریافت کنید
-- 📋 کانفیگ‌ها را کپی کنید
-- 📱 QR Code کانفیگ‌ها را دریافت کنید
-
----
-
-📡 Subscription
-
-برای هر کاربر یک صفحه اختصاصی Subscription وجود دارد.
-
-اطلاعات واقعی کاربر در این صفحه نمایش داده می‌شود:
-
-Username
-Status
-Data Limit
-Used Traffic
-Remaining Traffic
-Remaining Days
-Subscription URL
-Configurations
-
-همچنین امکانات زیر در اختیار کاربر قرار می‌گیرد:
-
-📋 Copy Subscription
-📋 Copy All Configs
-📱 QR Code
-🔗 Open Subscription
+<pre>
+╭──────────────────────────────╮
+│        ✦ PABLO PANEL ✦       │
+│                              │
+│   USERNAME                   │
+│   ───────────────────────    │
+│   ● ACTIVE                   │
+│                              │
+│   VOLUME                     │
+│   ███████████░░░  72%       │
+│                              │
+│   USED       REMAINING      │
+│   28 GB         72 GB       │
+│                              │
+│   EXPIRATION                 │
+│   30 DAYS REMAINING          │
+│                              │
+│   ┌──────────────────────┐   │
+│   │   COPY SUBSCRIPTION  │   │
+│   └──────────────────────┘   │
+╰──────────────────────────────╯
+</pre>
 
 ---
 
-📊 Dashboard
+## 🧩 پنل از چه بخش‌هایی تشکیل شده؟
 
-داشبورد PabloPanel اطلاعات اصلی را در یک صفحه نمایش می‌دهد:
+Pablo Panel فقط یک صفحه ساده برای نمایش لینک نیست؛ بخش‌های مختلف پنل برای مدیریت اطلاعات سرویس کنار هم قرار گرفته‌اند.
 
-بخش| اطلاعات
-👥 Users| تعداد کاربران
-🟢 Active| کاربران فعال
-📡 Traffic| حجم ترافیک
-📊 Used| مصرف ترافیک
-🖥️ Server| وضعیت سرور
+### 👤 کاربران
 
----
+اطلاعات هر کاربر می‌تواند شامل موارد زیر باشد:
 
-⚙️ Configuration
-
-تنظیمات| مقدار
-Panel| PabloPanel
-Port| "8080"
-Platform| Railway
-Container| Docker
-Interface| Dark Neon
+• Username  
+• وضعیت سرویس  
+• حجم کل  
+• حجم مصرف‌شده  
+• حجم باقی‌مانده  
+• درصد مصرف  
+• تاریخ شروع  
+• تاریخ انقضا  
+• زمان باقی‌مانده  
+• UUID یا شناسه سرویس  
+• اطلاعات اتصال در صورت وجود  
 
 ---
 
-📁 Project Structure
+### 🔗 کانفیگ‌ها
 
-PabloPanel/
-│
-├── static/
-│
-├── templates/
-│   ├── login.html
-│   ├── dashboard.html
-│   └── subscription.html
-│
-├── app.py
-├── Dockerfile
-└── requirements.txt
+کانفیگ‌های مربوط به هر سرویس به صورت جداگانه نمایش داده می‌شوند.
+
+برای هر کانفیگ می‌توان:
+
+• کانفیگ را مشاهده کرد  
+• کانفیگ را کپی کرد  
+• چند کانفیگ را جداگانه مدیریت کرد  
+• اطلاعات را بدون شلوغی در صفحه مشاهده کرد  
 
 ---
 
-🔐 Default Login
+### 📡 Subscription
 
-Username: admin
-Password: admin
+برای هر سرویس می‌توان لینک Subscription مربوط به همان کاربر را نمایش داد.
 
-«⚠️ برای استفاده عمومی، اطلاعات ورود پیش‌فرض را تغییر دهید.»
+کاربر می‌تواند لینک اشتراک خود را مستقیماً از داخل پنل دریافت و کپی کند.
 
 ---
 
-🌌 PabloPanel
+### 📊 مصرف حجم
 
-<div align="center">⚡ PabloPanel
+اطلاعات مصرف سرویس به صورت واضح نمایش داده می‌شود:
 
-Dark Neon VPN Control Panel
+<pre>
+Total
+100 GB
 
-"VPN" • "Subscriptions" • "Railway"
+Used
+28 GB
 
-<br>Built for a better experience.
+Remaining
+72 GB
 
-</div>
+Usage
+28%
+██████░░░░░░░░░░
+</pre>
+
+---
+
+### ⏳ زمان سرویس
+
+پنل می‌تواند وضعیت زمانی سرویس را نمایش دهد:
+
+• تاریخ شروع  
+• تاریخ پایان  
+• روزهای باقی‌مانده  
+• وضعیت Active  
+• وضعیت Expired  
+
+---
+
+### ⚙️ تنظیمات
+
+اطلاعات اتصال و تنظیمات مورد نیاز پروژه می‌توانند از طریق Environment Variables یا تنظیمات پروژه مدیریت شوند.
+
+به این ترتیب اطلاعات حساس مستقیماً داخل رابط کاربری قرار نمی‌گیرند.
+
+---
+
+# 🚀 راه‌اندازی
+
+راه‌اندازی پروژه ساده طراحی شده است.
+
+**فقط پروژه را Deploy کن و تمام.**
+
+برای اجرای پروژه روی Railway:
+
+1. وارد Repository پروژه شوید.
+2. پروژه را به Railway متصل کنید.
+3. متغیرهای محیطی مورد نیاز را وارد کنید.
+4. Deploy را بزنید.
+5. بعد از اتمام Deploy، آدرس پنل در اختیار شما قرار می‌گیرد.
+
+---
+
+# ☁️ Deploy روی Railway
+
+برای اجرای سریع پروژه می‌توانید از Railway استفاده کنید.
+
+<p align="center">
+  <a href="https://railway.app/">
+    <img src="https://capsule-render.vercel.app/api?type=rect&color=0:05001A,45:172554,75:312E81,100:00BFFF&height=55&text=%E2%9C%A6%20DEPLOY%20ON%20RAILWAY%20%E2%9C%A6&fontColor=FFFFFF&fontSize=18&fontAlignY=52&animation=twinkling" />
+  </a>
+</p>
+
+بعد از اتصال Repository:
+
+<pre>
+GitHub Repository
+       ↓
+    Railway
+       ↓
+ Environment Variables
+       ↓
+     Deploy
+       ↓
+   Pablo Panel
+</pre>
+
+---
+
+# 📱 Mobile First
+
+Pablo Panel با تمرکز روی موبایل ساخته شده است.
+
+طراحی صفحه باید به گونه‌ای باشد که:
+
+• محتوا از عرض صفحه خارج نشود  
+• اسکرول افقی ایجاد نشود  
+• کارت‌ها بیش از حد بزرگ نباشند  
+• متن‌ها روی صفحه به هم نریزند  
+• دکمه‌ها برای لمس موبایل مناسب باشند  
+• اطلاعات مهم بدون اسکرول‌های غیرضروری قابل مشاهده باشند  
+
+پنل برای استفاده روزمره روی صفحه‌های کوچک طراحی شده است.
+
+---
+
+# ⚡ ویژگی‌های اصلی
+
+• داشبورد مدرن  
+• طراحی مخصوص موبایل  
+• نمایش وضعیت سرویس  
+• نمایش حجم کل  
+• نمایش حجم مصرف‌شده  
+• نمایش حجم باقی‌مانده  
+• نمایش درصد مصرف  
+• نمایش تاریخ انقضا  
+• نمایش زمان باقی‌مانده  
+• نمایش Subscription  
+• نمایش کانفیگ‌ها  
+• Copy سریع اطلاعات  
+• طراحی Dark  
+• افکت‌های Neon  
+• Glass UI  
+• پس‌زمینه متحرک  
+• سازگار با Railway  
+• قابلیت اتصال به Backend و API  
+
+---
+
+# ✦ هدف پروژه
+
+هدف Pablo Panel ساخت یک تجربه ساده و حرفه‌ای برای کاربری است که فقط می‌خواهد وارد پنل شود، وضعیت سرویس خود را ببیند و اطلاعات اتصالش را سریع دریافت کند.
+
+بدون صفحه‌های شلوغ.
+
+بدون منوهای اضافه.
+
+بدون طراحی قدیمی.
+
+فقط یک داشبورد مدرن، سریع و قابل استفاده.
+
+---
+
+# ⭐ حمایت از پروژه
+
+اگر این پروژه برایت مفید بود، می‌توانی با Star کردن Repository از پروژه حمایت کنی.
+
+<p align="center">
+  <a href="https://github.com/hdzirxluci-hub/pablo-panel">
+    <img src="https://capsule-render.vercel.app/api?type=rect&color=0:05001A,45:172554,75:4C1D95,100:7C3AED&height=55&text=%E2%9C%A6%20%E2%98%85%20STAR%20THE%20PROJECT%20%E2%98%85%20%E2%9C%A6&fontColor=FFFFFF&fontSize=18&fontAlignY=52&animation=twinkling" />
+  </a>
+</p>
+
+---
+
+# ✦ Repository
+
+<p align="center">
+  <a href="https://github.com/hdzirxluci-hub/pablo-panel">
+    <img src="https://capsule-render.vercel.app/api?type=rect&color=0:05001A,45:172554,75:312E81,100:00BFFF&height=55&text=%E2%9C%A6%20VIEW%20PABLO%20PANEL%20ON%20GITHUB%20%E2%9C%A6&fontColor=FFFFFF&fontSize=17&fontAlignY=52&animation=twinkling" />
+  </a>
+</p>
+
+---
+
+# 💙 حرف آخر
+
+Pablo Panel برای این ساخته شده که مدیریت سرویس‌ها و نمایش اطلاعات کاربران، هم ساده باشد و هم ظاهر حرفه‌ای خودش را حفظ کند.
+
+**مدیریت سرویس، ساده‌تر از همیشه.**
+
+ساخته شده با ♥️ توسط [@poll_o0](https://t.me/poll_o0)
+
+<p align="center">
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:00BFFF,45:312E81,75:101B4D,100:05001A&height=120&section=footer&animation=twinkling" width="100%"/>
+</p>
